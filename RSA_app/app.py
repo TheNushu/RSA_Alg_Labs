@@ -28,7 +28,9 @@ label2 = tk.Label(root, text="Enter public key:")
 entry2 = tk.Entry(root, width=25) 
 
 #button for encryption, sending text to encrypt and public key
-button1 = tk.Button(root, text="Encrypt", command=encrypt_message(entry1, entry2, output_text)) 
+button1 = tk.Button(root, 
+                    text="Encrypt", 
+                    command=encrypt_message(entry1, entry2, output_text)) 
 
 label3 = tk.Label(root, text="Enter string to decrypt:")
 entry3 = tk.Entry(root, width=25)
