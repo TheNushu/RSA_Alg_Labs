@@ -2,16 +2,71 @@
 import tkinter as tk
 from rsa_functionality import generate_keys, encrypt_message, decrypt_message
 
-def function1():
-    input_text = entry1.get()
-    result = input_text[::-1]
-    output_text.set(result)
+def copy_to_clipboard(text):
+    root.clipboard_clear()
+    root.clipboard_append(text)
+    root.update() 
 
-def function2():
-    input_text1 = entry2.get()
-    input_text2 = entry3.get()
-    result = input_text1 + " " + input_text2  
-    output_text.set(result)
+def encrypt_wrapper():
+    # Get the input text and public key from the entries
+    input_text = entry1.get()
+    public_key = entry2.get()
+
+    # Call the external function encrypt_message from the rsa module
+    try:
+        encrypted_message = encrypt_message(input_text, public_key)
+        # Set the result to the output_text variable, which updates the GUI
+        output_text.set(encrypted_message)
+    except Exception as e:
+        output_text.set(f"Error: {str(e)}")
+
+def decrypt_wrapper():
+    # Get the input text and public key from the entries
+    encrypted_text = entry3.get()
+    private_key = entry4.get()
+
+    # Call the external function encrypt_message from the rsa module
+    try:
+        encrypted_message = decrypt_message(encrypted_text, private_key)
+        # Set the result to the output_text variable, which updates the GUI
+        output_text.set(encrypted_message)
+    except Exception as e:
+        output_text.set(f"Error: {str(e)}")
+
+def generate_and_show_keys():
+    root.public_key, root.private_key = "123", "456"
+
+    tk.messagebox.showinfo("Warning!", "Please do not share your private key!")
+    
+    root.label_pub = tk.Label(root, text="Your Public key:")
+    root.entry_pub = tk.Entry(root, width=40)
+
+    root.label_priv = tk.Label(root, text="Your Private key:")
+    root.entry_priv = tk.Entry(root, width=40)
+
+    root.entry_pub.insert(0, root.public_key)
+    root.entry_priv.insert(0, root.private_key)
+
+    root.label_pub.grid(row=6, column=0, padx=10, pady=10)
+    root.entry_pub.grid(row=6, column=1, padx=10, pady=10)
+
+    button_copy_public_key.grid(row=6, column=2, padx=10, pady=10)
+
+    root.label_priv.grid(row=7, column=0, padx=10, pady=10)
+    root.entry_priv.grid(row=7, column=1, padx=10, pady=10)
+
+    button_copy_private_key.grid(row=7, column=2, padx=10, pady=10)
+
+
+def copy_and_destroy_key(button, entry, label):
+    if entry:
+        copy_to_clipboard(entry.get())
+        label.destroy()
+        entry.destroy()
+        output_text.set("Your key has been copied to your clipboard.\n\n"
+                        "Please save it somewhere to not lose it.")
+        button.destroy()
+
 
 # Create the main window
 root = tk.Tk()
@@ -22,34 +77,54 @@ output_label = tk.Label(root, textvariable=output_text)
 
 # Create widgets
 label1 = tk.Label(root, text="Enter a string to encrypt:")
-entry1 = tk.Entry(root, width=50)
+entry1 = tk.Entry(root, width=40)
 
 label2 = tk.Label(root, text="Enter public key:") 
-entry2 = tk.Entry(root, width=25) 
+entry2 = tk.Entry(root, width=40) 
 
 #button for encryption, sending text to encrypt and public key
 button1 = tk.Button(root, 
                     text="Encrypt", 
-                    command=encrypt_message(entry1, entry2, output_text)) 
+                    command=encrypt_wrapper) 
 
 label3 = tk.Label(root, text="Enter string to decrypt:")
-entry3 = tk.Entry(root, width=25)
+entry3 = tk.Entry(root, width=40)
 
 label4 = tk.Label(root, text="Enter private key:")
-entry4 = tk.Entry(root, width=25)
+entry4 = tk.Entry(root, width=40)
 
 button2 = tk.Button(root, 
                     text="Decrypt", 
-                    command=decrypt_message(entry3, entry4))
+                    command=decrypt_wrapper)
+
+button_copy_public_key = tk.Button(root, 
+                                   text="Copy Public Key", 
+                                   command=lambda: 
+                                    copy_and_destroy_key(
+                                         button_copy_public_key, 
+                                         root.entry_pub, 
+                                         root.label_pub)
+                                         )
+
+button_copy_private_key = tk.Button(root, 
+                                    text="Copy Private Key", 
+                                    command=lambda: 
+                                     copy_and_destroy_key(
+                                         button_copy_private_key, 
+                                         root.entry_priv, 
+                                         root.label_priv)
+                                         )
 
 button3 = tk.Button(root, 
-                    text="Generate pair of keys", 
-                    command=generate_keys)
+                    text="Generate Encryption Keys", 
+                    command=generate_and_show_keys
+                    )
+
 
 # Layout widgets
 label1.grid(row=0, column=0, padx=10, pady=10)
 entry1.grid(row=0, column=1, padx=10, pady=10)
-button1.grid(row=0, column=2, padx=10, pady=10)
+
 
 label2.grid(row=1, column=0, padx=10, pady=10)
 entry2.grid(row=1, column=1, padx=10, pady=10)
@@ -57,17 +132,24 @@ entry2.grid(row=1, column=1, padx=10, pady=10)
 label3.grid(row=2, column=0, padx=10, pady=10)
 entry3.grid(row=2, column=1, padx=10, pady=10)
 
-label4.grid(row=4, column=0, padx=10, pady=10)
-entry4.grid(row=4, column=1, padx=10, pady=10)
+label4.grid(row=3, column=0, padx=10, pady=10)
+entry4.grid(row=3, column=1, padx=10, pady=10)
 
+button1.grid(row=0, column=2, padx=10, pady=10)
 
-button2.grid(row=1, column=2, rowspan=2, padx=10, pady=10)
+button2.grid(row=2, column=2, padx=10, pady=10)
 
-button3.grid(row=5, column=1, padx=10, pady=10)  
+button3.grid(row=4, column=1, padx=10, pady=10)  
 
-output_label.grid(row=3, column=0, 
+output_label.grid(row=5, column=0, 
                   columnspan=3, padx=10, 
                   pady=10)
+
+# Placeholder for dynamic widgets to prevent AttributeError
+root.label_pub = None
+root.entry_pub = None
+root.label_priv = None
+root.entry_priv = None
 
 # Start the GUI event loop
 root.mainloop()
