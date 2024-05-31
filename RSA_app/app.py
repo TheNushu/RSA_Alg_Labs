@@ -7,66 +7,40 @@ def copy_to_clipboard(text):
     root.clipboard_append(text)
     root.update() 
 
+    output_text.set("Your key has been copied to your clipboard.\n\n"
+                        "Please save it somewhere to not lose it.")
+
 def encrypt_wrapper():
-    # Get the input text and public key from the entries
     input_text = entry1.get()
     public_key = entry2.get()
 
-    # Call the external function encrypt_message from the rsa module
     try:
         encrypted_message = encrypt_message(input_text, public_key)
-        # Set the result to the output_text variable, which updates the GUI
+        # Update GUI with output of the encryption
         output_text.set(encrypted_message)
     except Exception as e:
         output_text.set(f"Error: {str(e)}")
 
 def decrypt_wrapper():
-    # Get the input text and public key from the entries
     encrypted_text = entry3.get()
     private_key = entry4.get()
 
-    # Call the external function encrypt_message from the rsa module
     try:
-        encrypted_message = decrypt_message(encrypted_text, private_key)
-        # Set the result to the output_text variable, which updates the GUI
-        output_text.set(encrypted_message)
+        decrypted_message = decrypt_message(encrypted_text, private_key)
+        # Update the GUI with output of the decryption
+        output_text.set(decrypted_message)
     except Exception as e:
         output_text.set(f"Error: {str(e)}")
 
 def generate_and_show_keys():
-    root.public_key, root.private_key = "123", "456"
+    root.public_key, root.private_key = generate_keys()
 
-    tk.messagebox.showinfo("Warning!", "Please do not share your private key!")
+    tk.messagebox.showinfo("Warning!", 
+                           "Please do not share your private key!")
     
-    root.label_pub = tk.Label(root, text="Your Public key:")
-    root.entry_pub = tk.Entry(root, width=40)
-
-    root.label_priv = tk.Label(root, text="Your Private key:")
-    root.entry_priv = tk.Entry(root, width=40)
-
-    root.entry_pub.insert(0, root.public_key)
-    root.entry_priv.insert(0, root.private_key)
-
-    root.label_pub.grid(row=6, column=0, padx=10, pady=10)
-    root.entry_pub.grid(row=6, column=1, padx=10, pady=10)
-
-    button_copy_public_key.grid(row=6, column=2, padx=10, pady=10)
-
-    root.label_priv.grid(row=7, column=0, padx=10, pady=10)
-    root.entry_priv.grid(row=7, column=1, padx=10, pady=10)
-
-    button_copy_private_key.grid(row=7, column=2, padx=10, pady=10)
-
-
-def copy_and_destroy_key(button, entry, label):
-    if entry:
-        copy_to_clipboard(entry.get())
-        label.destroy()
-        entry.destroy()
-        output_text.set("Your key has been copied to your clipboard.\n\n"
-                        "Please save it somewhere to not lose it.")
-        button.destroy()
-
+    entry_pub.insert(0, root.public_key)
+    entry_priv.insert(0, root.private_key)
+    
 
 # Create the main window
 root = tk.Tk()
@@ -93,6 +67,12 @@ entry3 = tk.Entry(root, width=40)
 label4 = tk.Label(root, text="Enter private key:")
 entry4 = tk.Entry(root, width=40)
 
+label_pub = tk.Label(root, text="Your Public key:")
+entry_pub = tk.Entry(root, width=40)
+
+label_priv = tk.Label(root, text="Your Private key:")
+entry_priv = tk.Entry(root, width=40)
+
 button2 = tk.Button(root, 
                     text="Decrypt", 
                     command=decrypt_wrapper)
@@ -100,20 +80,18 @@ button2 = tk.Button(root,
 button_copy_public_key = tk.Button(root, 
                                    text="Copy Public Key", 
                                    command=lambda: 
-                                    copy_and_destroy_key(
-                                         button_copy_public_key, 
-                                         root.entry_pub, 
-                                         root.label_pub)
+                                    copy_to_clipboard(
+                                         entry_pub.get()
                                          )
+                                    )
 
 button_copy_private_key = tk.Button(root, 
                                     text="Copy Private Key", 
                                     command=lambda: 
-                                     copy_and_destroy_key(
-                                         button_copy_private_key, 
-                                         root.entry_priv, 
-                                         root.label_priv)
+                                     copy_to_clipboard(
+                                         entry_priv.get()
                                          )
+                                    )
 
 button3 = tk.Button(root, 
                     text="Generate Encryption Keys", 
@@ -124,7 +102,6 @@ button3 = tk.Button(root,
 # Layout widgets
 label1.grid(row=0, column=0, padx=10, pady=10)
 entry1.grid(row=0, column=1, padx=10, pady=10)
-
 
 label2.grid(row=1, column=0, padx=10, pady=10)
 entry2.grid(row=1, column=1, padx=10, pady=10)
@@ -139,7 +116,17 @@ button1.grid(row=0, column=2, padx=10, pady=10)
 
 button2.grid(row=2, column=2, padx=10, pady=10)
 
-button3.grid(row=4, column=1, padx=10, pady=10)  
+button3.grid(row=4, column=1, padx=10, pady=10)
+
+label_pub.grid(row=6, column=0, padx=10, pady=10)
+entry_pub.grid(row=6, column=1, padx=10, pady=10)
+
+button_copy_public_key.grid(row=6, column=2, padx=10, pady=10)
+
+label_priv.grid(row=7, column=0, padx=10, pady=10)
+entry_priv.grid(row=7, column=1, padx=10, pady=10)
+
+button_copy_private_key.grid(row=7, column=2, padx=10, pady=10)
 
 output_label.grid(row=5, column=0, 
                   columnspan=3, padx=10, 
