@@ -1,7 +1,5 @@
-from tkinter import messagebox, simpledialog
-import rsa
-
-# Large Prime Generation for RSA
+import rsa  #used as placeholder until we implement our
+            #own functions 
 import random
 
 # Pre generated primes
@@ -16,65 +14,68 @@ first_primes_list = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
 					307, 311, 313, 317, 331, 337, 347, 349]
 
 
-def nBitRandom(n):
+def n_bit_random(n):
+	#obtian a Random number
+	if n < 2:    
+		raise ValueError("Bit size must be at least 2 to form a valid range")
+    # obtain a Random number
 	return random.randrange(2**(n-1)+1, 2**n - 1)
 
 
-def getLowLevelPrime(n):
-	'''Generate a prime candidate divisible 
-	by first primes'''
+def get_low_level_prime(n):
+	#Generate a prime candidate divisible 
+	#by first primes
 	while True:
-		# Obtain a random number
-		pc = nBitRandom(n)
-
+		prime_candidate = n_bit_random(n)
 		# Test divisibility by pre-generated
 		# primes
 		for divisor in first_primes_list:
-			if pc % divisor == 0 and divisor**2 <= pc:
+			if prime_candidate % divisor == 0 and divisor**2 <= prime_candidate:
 				break
 		else:
-			return pc
+			return prime_candidate
 
 
-def isMillerRabinPassed(mrc):
-	'''Run 20 iterations of Rabin Miller Primality test'''
-	maxDivisionsByTwo = 0
-	ec = mrc-1
-	while ec % 2 == 0:
-		ec >>= 1
-		maxDivisionsByTwo += 1
-	assert(2**maxDivisionsByTwo * ec == mrc-1)
+def is_miller_rabin_passed(prime_candidate):
+	#Run 20 iterations of Rabin Miller Primality test
+	
+	max_Divisions_By_Two = 0
+	d= prime_candidate-1
+	while d% 2 == 0:
+		d>>= 1
+		max_Divisions_By_Two += 1
+	assert(2**max_Divisions_By_Two * d== prime_candidate-1)
 
-	def trialComposite(round_tester):
-		if pow(round_tester, ec, mrc) == 1:
+	def is_composite(round_tester):
+		if pow(round_tester, d, prime_candidate) == 1:
 			return False
-		for i in range(maxDivisionsByTwo):
-			if pow(round_tester, 2**i * ec, mrc) == mrc-1:
+		for i in range(max_Divisions_By_Two):
+			if pow(round_tester, 2**i * d, prime_candidate) == prime_candidate-1:
 				return False
 		return True
 
-	# Set number of trials here
+	# Set number trials
 	numberOfRabinTrials = 20
 	for i in range(numberOfRabinTrials):
-		round_tester = random.randrange(2, mrc)
-		if trialComposite(round_tester):
+		round_tester = random.randrange(2, prime_candidate)
+		if is_composite(round_tester):
 			return False
 	return True
 
 
-if __name__ == '__main__':
+def generate_prime(bits):
 	while True:
-		n = 1024
-		prime_candidate = getLowLevelPrime(n)
-		if not isMillerRabinPassed(prime_candidate):
+		prime_candidate = get_low_level_prime(bits)
+		if not is_miller_rabin_passed(prime_candidate):
 			continue
 		else:
-			print(n, "bit prime is: \n", prime_candidate)
-			break
+			#print(prime_bits, "bit prime is: \n", prime_candidate)
+			return prime_candidate
 
 
 def generate_keys():
-    public_key, private_key = rsa.newkeys(1024)
+    public_key = generate_prime(1024) #number of bits of the key
+    private_key = generate_prime(1024)
 
     return public_key, private_key
 

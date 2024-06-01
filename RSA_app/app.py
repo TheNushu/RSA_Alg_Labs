@@ -1,5 +1,6 @@
 
 import tkinter as tk
+from tkinter import messagebox
 from rsa_functionality import generate_keys, encrypt_message, decrypt_message
 
 def copy_to_clipboard(text):
@@ -35,7 +36,7 @@ def decrypt_wrapper():
 def generate_and_show_keys():
     root.public_key, root.private_key = generate_keys()
 
-    tk.messagebox.showinfo("Warning!", 
+    messagebox.showinfo("Warning!", 
                            "Please do not share your private key!")
     
     entry_pub.insert(0, root.public_key)
