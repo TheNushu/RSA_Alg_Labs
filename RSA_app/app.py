@@ -30,7 +30,7 @@ def encrypt_wrapper():
         root.clipboard_append(encrypted_message)
         root.update() 
         
-        output_text.set(str(encrypted_message)[0:30]+"...")
+        output_text.set(f"The text has been encrypted and copied to your clipboard: {str(encrypted_message)[0:15]}")
     except ValueError as ve:
         output_text.set(f"Invalid public key format. Please enter as 'e n'. Error: {str(ve)}")
     except Exception as e:
