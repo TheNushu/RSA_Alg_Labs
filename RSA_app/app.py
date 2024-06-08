@@ -13,25 +13,51 @@ def copy_to_clipboard(text):
 
 def encrypt_wrapper():
     input_text = entry1.get()
-    public_key = entry2.get()
-
+    public_key_str = entry2.get()  # This is a string, for example "65537 12345678901234567890"
+    
     try:
+        # Splitting the string into components and converting to integers
+        e_str, n_str = public_key_str.split()
+        e = int(e_str)
+        n = int(n_str)
+        public_key = (e, n)
+
         encrypted_message = encrypt_message(input_text, public_key)
-        # Update GUI with output of the encryption
-        output_text.set(encrypted_message)
+        
+        #we copy the encrypted text now for testing
+        #later specific ui to copy encrypted text
+        root.clipboard_clear()
+        root.clipboard_append(encrypted_message)
+        root.update() 
+        
+        output_text.set(str(encrypted_message)[0:30]+"...")
+    except ValueError as ve:
+        output_text.set(f"Invalid public key format. Please enter as 'e n'. Error: {str(ve)}")
     except Exception as e:
         output_text.set(f"Error: {str(e)}")
+
 
 def decrypt_wrapper():
-    encrypted_text = entry3.get()
-    private_key = entry4.get()
+    encrypted_text = entry3.get()  # This is the encrypted integer as a string
+    private_key_str = entry4.get()  # This is a string, for example "d n"
 
     try:
-        decrypted_message = decrypt_message(encrypted_text, private_key)
-        # Update the GUI with output of the decryption
+        # Splitting the string into components and converting to integers
+        d_str, n_str = private_key_str.split()
+        d = int(d_str)
+        n = int(n_str)
+        private_key = (d, n)
+
+        # Convert the encrypted text back to integer
+        encrypted_int = int(encrypted_text)  
+
+        decrypted_message = decrypt_message(encrypted_int, private_key)
         output_text.set(decrypted_message)
+    except ValueError as ve:
+        output_text.set(f"Invalid private key or ciphertext format. Please ensure proper format. Error: {str(ve)}")
     except Exception as e:
         output_text.set(f"Error: {str(e)}")
+
 
 def generate_and_show_keys():
     root.public_key, root.private_key = generate_keys()
