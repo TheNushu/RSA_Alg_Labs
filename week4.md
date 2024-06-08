@@ -16,6 +16,8 @@
 * What did you learn this week:
 	* this week I looked up "extensively" (just an hour or two, but around 25% of the total time) on how to make sure the encryption and decryption work effectively
 	* looked into security of rsa and what are its weakpoints in the encryption proccess.
+	* I found a project where a person predicted random numbers generated with python random library. 
+		* more incentive to change the random library to secrets library (which I learned that it is considered cryptographically secure)
 
 * What has been problematic:
 	* unittesting issues
