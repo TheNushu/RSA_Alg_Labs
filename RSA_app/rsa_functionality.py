@@ -1,5 +1,3 @@
-import rsa  #used as placeholder until we implement our
-            #own functions 
 import random
 
 # Pre generated primes
@@ -54,7 +52,10 @@ def is_miller_rabin_passed(prime_candidate):
 				return False
 		return True
 
-	# Set number trials
+	# Set number trials 
+	# More iterations = better security, slower process
+	    #This is because, with more trials, the Rabil Miller
+        #can be more probabilistically certain
 	numberOfRabinTrials = 20
 	for i in range(numberOfRabinTrials):
 		round_tester = random.randrange(2, prime_candidate)
@@ -72,15 +73,43 @@ def generate_prime(bits):
 			#print(prime_bits, "bit prime is: \n", prime_candidate)
 			return prime_candidate
 
-
 def generate_keys():
-    public_key = generate_prime(1024) #number of bits of the key
-    private_key = generate_prime(1024)
+    p = generate_prime(512) #number of bits of the key
+    q = generate_prime(512)
+    n = p * q
+    phi_n = (p - 1) * (q - 1)
+	
+    # Common choice for e
+    e = 65537
+	
+    # if e and phi_n are coprime = security flaw,
+    #   easy to decrypt
+	# we change keys until that is not happening
+	# we could also just change e instead
+    while (p - 1) * (q - 1) % e == 0:
+        p = generate_prime(512) 
+        q = generate_prime(512)
+    
+    n = p * q
+    phi_n = (p - 1) * (q - 1)
+		
+    # Calculate d, the mod inverse of e under phi(n)
+    d = pow(e, -1, phi_n)
 
-    return public_key, private_key
+    # The public key is (e, n) and the private key is (d, n)
+    return ((e, n), (d, n))
 
-def encrypt_message(entry_text, entry_public_key):
-    return f"Hey your text: {entry_text} is encrypted with: {entry_public_key[0:30]}..."
 
-def decrypt_message(entry_text, entry_private_key):
-    return f"Hey your private text: {entry_text} is decrypted with: {entry_private_key[0:30]}..."
+def encrypt_message(message, public_key):
+    e, n = public_key
+    # Convert message to an integer for encryption
+    m_int = int.from_bytes(message.encode('utf-8'), 'big')
+    c = pow(m_int, e, n)
+    return c
+
+def decrypt_message(ciphertext, private_key):
+    d, n = private_key
+    m_int = pow(ciphertext, d, n)
+    # Convert integer back to string
+    message = m_int.to_bytes((m_int.bit_length() + 7) // 8, 'big').decode('utf-8')
+    return message
