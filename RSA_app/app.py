@@ -1,169 +1,158 @@
+"""
+This module implements a graphical user interface (GUI)
+for an RSA encryption and decryption tool using Tkinter.
+
+The application provides functionality to:
+- Generate RSA public and private keys.
+- Encrypt messages using a given RSA public key.
+- Decrypt messages using a corresponding RSA private key.
+- Copy the generated keys to the clipboard for external and easier internal use.
+
+Users can input strings directly and perform encryption or decryption operations.
+Keys are displayed in the GUI and can be regenerated as needed.
+This tool is intended for educational purposes to demonstrate RSA operations.
+
+Functions:
+- COPY_TO_CLIPBOARD(text): Copies the provided text to the clipboard.
+- ENCRYPT_WRAPPER(): Fetches user inputs and encrypts the text using the RSA public key.
+- DECRYPT_WRAPPER(): Decrypts the encrypted message using the RSA private key.
+- GENERATE_AND_SHOW_KEYS(): Generates RSA keys and updates the GUI with these keys.
+
+Author: Daniel-Ioan Mlesnita
+Date: 11.06.2024
+Version: 0.5
+"""
 
 import tkinter as tk
 from tkinter import messagebox
 from rsa_functionality import generate_keys, encrypt_message, decrypt_message
 
 def copy_to_clipboard(text):
-    root.clipboard_clear()
-    root.clipboard_append(text)
-    root.update() 
-
-    output_text.set("Your key has been copied to your clipboard.\n\n"
-                        "Please save it somewhere to not lose it.")
+    """Copies a key (public or private) to user clipboard for easier save and use."""
+    ROOT.clipboard_clear()
+    ROOT.clipboard_append(text)
+    ROOT.update()
+    OUTPUT_TEXT.set("Your key has been copied to your clipboard.\n\n"
+                    "Please save it somewhere to not lose it.")
 
 def encrypt_wrapper():
-    input_text = entry1.get()
-    public_key_str = entry2.get()  # This is a string, for example "65537 12345678901234567890"
-    
+    """Wraps the text and public key to send to the encryption function in RSA logic.
+    Retrieves the result that is the encrypted text and copies it to clipboard."""
+
+    input_text = ENTRY_ENCRYPT.get()
+    public_key_str = ENTRY_PUB_KEY.get() #This is a string, for example "65537 12345678901234567890"
+
     try:
-        # Splitting the string into components and converting to integers
         e_str, n_str = public_key_str.split()
-        e = int(e_str)
-        n = int(n_str)
-        public_key = (e, n)
+        pub_exponent = int(e_str)
+        modulus = int(n_str)
+        public_key = (pub_exponent, modulus)
 
         encrypted_message = encrypt_message(input_text, public_key)
-        
-        #we copy the encrypted text now for testing
-        #later specific ui to copy encrypted text
-        root.clipboard_clear()
-        root.clipboard_append(encrypted_message)
-        root.update() 
-        
-        output_text.set(f"The text has been encrypted and copied to your clipboard: {str(encrypted_message)[0:15]}")
-    except ValueError as ve:
-        output_text.set(f"Invalid public key format. Please enter as 'e n'. Error: {str(ve)}")
-    except Exception as e:
-        output_text.set(f"Error: {str(e)}")
-
+        ROOT.clipboard_clear()
+        ROOT.clipboard_append(encrypted_message)
+        ROOT.update()
+        OUTPUT_TEXT.set(f"The text has been encrypted and copied to your clipboard:"
+                        f"{str(encrypted_message)[:15]}...")
+    except ValueError as val_err:
+        OUTPUT_TEXT.set(f"Invalid public key format."
+                        f"Please enter as 'e n'. Error: {str(val_err)}")
 
 def decrypt_wrapper():
-    encrypted_text = entry3.get()  # This is the encrypted integer as a string
-    private_key_str = entry4.get()  # This is a string, for example "d n"
+    """Wraps the encrypted text and private key to send to the decryption function in RSA logic.
+    Retrieves the result that is the decrypted text."""
+
+    encrypted_text = ENTRY_DECRYPT.get()
+    private_key_str = ENTRY_PRIV_KEY.get()
 
     try:
-        # Splitting the string into components and converting to integers
         d_str, n_str = private_key_str.split()
-        d = int(d_str)
-        n = int(n_str)
-        private_key = (d, n)
-
-        # Convert the encrypted text back to integer
-        encrypted_int = int(encrypted_text)  
-
+        priv_exponent = int(d_str)
+        modulus = int(n_str)
+        private_key = (priv_exponent, modulus)
+        encrypted_int = int(encrypted_text)
         decrypted_message = decrypt_message(encrypted_int, private_key)
-        output_text.set(decrypted_message)
-    except ValueError as ve:
-        output_text.set(f"Invalid private key or ciphertext format. Please ensure proper format. Error: {str(ve)}")
-    except Exception as e:
-        output_text.set(f"Error: {str(e)}")
-
+        OUTPUT_TEXT.set(decrypted_message)
+        
+    except ValueError as value_error:
+        OUTPUT_TEXT.set(f"Invalid private key or ciphertext format."
+                        f"Please ensure proper format. Error: {str(value_error)}")
 
 def generate_and_show_keys():
-    root.public_key, root.private_key = generate_keys()
+    """Calls the key generation functions of the RSA logic and returns the keys."""
+    ROOT.public_key, ROOT.private_key = generate_keys()
+    messagebox.showinfo("Warning!", "Please do not share your private key!")
 
-    messagebox.showinfo("Warning!", 
-                           "Please do not share your private key!")
-    
-    entry_pub.insert(0, root.public_key)
-    entry_priv.insert(0, root.private_key)
-    
+    ENTRY_PUB.delete(0, 'end')
+    ENTRY_PRIV.delete(0, 'end')
+
+    ENTRY_PUB.insert(0, ROOT.public_key)
+    ENTRY_PRIV.insert(0, ROOT.private_key)
 
 # Create the main window
-root = tk.Tk()
-root.title("Save my secret!!")
+ROOT = tk.Tk()
+ROOT.title("Save my secret!!")
 
-output_text = tk.StringVar()
-output_label = tk.Label(root, textvariable=output_text)
+OUTPUT_TEXT = tk.StringVar()
+OUTPUT_LABEL = tk.Label(ROOT, textvariable=OUTPUT_TEXT)
 
 # Create widgets
-label1 = tk.Label(root, text="Enter a string to encrypt:")
-entry1 = tk.Entry(root, width=40)
+ENCRYPT_TEXT = tk.Label(ROOT, text="Enter a string to encrypt:")
+ENTRY_ENCRYPT = tk.Entry(ROOT, width=40)
 
-label2 = tk.Label(root, text="Enter public key:") 
-entry2 = tk.Entry(root, width=40) 
+PUBLIC_KEY = tk.Label(ROOT, text="Enter public key:")
+ENTRY_PUB_KEY = tk.Entry(ROOT, width=40)
 
-#button for encryption, sending text to encrypt and public key
-button1 = tk.Button(root, 
-                    text="Encrypt", 
-                    command=encrypt_wrapper) 
+# Button for encryption, sending text to encrypt and public key
+ENCRYPT_BUTTON = tk.Button(ROOT, text="Encrypt", command=encrypt_wrapper)
 
-label3 = tk.Label(root, text="Enter string to decrypt:")
-entry3 = tk.Entry(root, width=40)
+DECRYPT_TEXT = tk.Label(ROOT, text="Enter string to decrypt:")
+ENTRY_DECRYPT = tk.Entry(ROOT, width=40)
 
-label4 = tk.Label(root, text="Enter private key:")
-entry4 = tk.Entry(root, width=40)
+PRIV_KEY_TEXT = tk.Label(ROOT, text="Enter private key:")
+ENTRY_PRIV_KEY = tk.Entry(ROOT, width=40)
 
-label_pub = tk.Label(root, text="Your Public key:")
-entry_pub = tk.Entry(root, width=40)
+PUB_KEY_LABEL = tk.Label(ROOT, text="Your Public key:")
+ENTRY_PUB = tk.Entry(ROOT, width=40)
 
-label_priv = tk.Label(root, text="Your Private key:")
-entry_priv = tk.Entry(root, width=40)
+PRIV_KEY_LABEL = tk.Label(ROOT, text="Your Private key:")
+ENTRY_PRIV = tk.Entry(ROOT, width=40)
 
-button2 = tk.Button(root, 
-                    text="Decrypt", 
-                    command=decrypt_wrapper)
+DECRYPT_BUTTON = tk.Button(ROOT, text="Decrypt", command=decrypt_wrapper)
 
-button_copy_public_key = tk.Button(root, 
-                                   text="Copy Public Key", 
-                                   command=lambda: 
-                                    copy_to_clipboard(
-                                         entry_pub.get()
-                                         )
-                                    )
+COPY_PUB_KEY_BUTTON = tk.Button(ROOT,
+                                text="Copy Public Key",
+                                command=lambda: copy_to_clipboard(ENTRY_PUB.get()))
+COPY_PRIV_KEY_BUTTON = tk.Button(ROOT,
+                                 text="Copy Private Key",
+                                 command=lambda: copy_to_clipboard(ENTRY_PRIV.get()))
 
-button_copy_private_key = tk.Button(root, 
-                                    text="Copy Private Key", 
-                                    command=lambda: 
-                                     copy_to_clipboard(
-                                         entry_priv.get()
-                                         )
-                                    )
-
-button3 = tk.Button(root, 
-                    text="Generate Encryption Keys", 
-                    command=generate_and_show_keys
-                    )
-
+GENERATE_KEYS_BUTTON = tk.Button(ROOT,
+                                 text="Generate Encryption Keys",
+                                 command=generate_and_show_keys)
 
 # Layout widgets
-label1.grid(row=0, column=0, padx=10, pady=10)
-entry1.grid(row=0, column=1, padx=10, pady=10)
+ENCRYPT_TEXT.grid(row=0, column=0, padx=10, pady=10)
+ENTRY_ENCRYPT.grid(row=0, column=1, padx=10, pady=10)
+PUBLIC_KEY.grid(row=1, column=0, padx=10, pady=10)
+ENTRY_PUB_KEY.grid(row=1, column=1, padx=10, pady=10)
+DECRYPT_TEXT.grid(row=2, column=0, padx=10, pady=10)
+ENTRY_DECRYPT.grid(row=2, column=1, padx=10, pady=10)
+PRIV_KEY_TEXT.grid(row=3, column=0, padx=10, pady=10)
+ENTRY_PRIV_KEY.grid(row=3, column=1, padx=10, pady=10)
 
-label2.grid(row=1, column=0, padx=10, pady=10)
-entry2.grid(row=1, column=1, padx=10, pady=10)
+ENCRYPT_BUTTON.grid(row=0, column=2, padx=10, pady=10)
+DECRYPT_BUTTON.grid(row=2, column=2, padx=10, pady=10)
+GENERATE_KEYS_BUTTON.grid(row=4, column=1, padx=10, pady=10)
 
-label3.grid(row=2, column=0, padx=10, pady=10)
-entry3.grid(row=2, column=1, padx=10, pady=10)
+PUB_KEY_LABEL.grid(row=6, column=0, padx=10, pady=10)
+ENTRY_PUB.grid(row=6, column=1, padx=10, pady=10)
+COPY_PUB_KEY_BUTTON.grid(row=6, column=2, padx=10, pady=10)
+PRIV_KEY_LABEL.grid(row=7, column=0, padx=10, pady=10)
+ENTRY_PRIV.grid(row=7, column=1, padx=10, pady=10)
+COPY_PRIV_KEY_BUTTON.grid(row=7, column=2, padx=10, pady=10)
 
-label4.grid(row=3, column=0, padx=10, pady=10)
-entry4.grid(row=3, column=1, padx=10, pady=10)
-
-button1.grid(row=0, column=2, padx=10, pady=10)
-
-button2.grid(row=2, column=2, padx=10, pady=10)
-
-button3.grid(row=4, column=1, padx=10, pady=10)
-
-label_pub.grid(row=6, column=0, padx=10, pady=10)
-entry_pub.grid(row=6, column=1, padx=10, pady=10)
-
-button_copy_public_key.grid(row=6, column=2, padx=10, pady=10)
-
-label_priv.grid(row=7, column=0, padx=10, pady=10)
-entry_priv.grid(row=7, column=1, padx=10, pady=10)
-
-button_copy_private_key.grid(row=7, column=2, padx=10, pady=10)
-
-output_label.grid(row=5, column=0, 
-                  columnspan=3, padx=10, 
-                  pady=10)
-
-# Placeholder for dynamic widgets to prevent AttributeError
-root.label_pub = None
-root.entry_pub = None
-root.label_priv = None
-root.entry_priv = None
+OUTPUT_LABEL.grid(row=5, column=0, columnspan=3, padx=10, pady=10)
 
 # Start the GUI event loop
-root.mainloop()
+ROOT.mainloop()
