@@ -1,11 +1,11 @@
 import unittest
-from rsa_functionality import n_bit_random, get_low_level_prime, first_primes_list, is_miller_rabin_passed, generate_keys, generate_prime, encrypt_message, decrypt_message
+from rsa_functionality import generate_n_bit_random, get_low_level_prime, FIRST_PRIMES_LIST, is_miller_rabin_passed, generate_keys, generate_prime, encrypt_message, decrypt_message
 
 class TestRSAGeneration(unittest.TestCase):
 
     def test_n_bit_random(self):
         for n in range(2, 10):  # Testing a variety of bit lengths
-            rand_num = n_bit_random(n)
+            rand_num = generate_n_bit_random(n)
             self.assertTrue(2**(n-1) + 1 <= rand_num < 2**n, 
                             f"Failed for bit length: {n}")
 
@@ -13,7 +13,7 @@ class TestRSAGeneration(unittest.TestCase):
         # This test might be probabilistic and not assert an exact prime every time
         prime = get_low_level_prime(1024)
         #ERRORS, NEEDS TO BE WORKED ON
-        self.assertFalse(any(prime % p == 0 for p in first_primes_list if p**2 <= prime),
+        self.assertFalse(any(prime % p == 0 for p in FIRST_PRIMES_LIST if p**2 <= prime),
                          "Generated number is divisible by one of the first primes list")
 
     def test_miller_rabin(self):
@@ -42,7 +42,7 @@ class TestRSAGeneration(unittest.TestCase):
 
     def test_input_validations(self):
         with self.assertRaises(ValueError):
-            n_bit_random(-1)  # Test negative bit length
+            generate_n_bit_random(-1)  # Test negative bit length
         with self.assertRaises(TypeError):
             encrypt_message(12345, (65537, 99991))  # Non-string message input
 

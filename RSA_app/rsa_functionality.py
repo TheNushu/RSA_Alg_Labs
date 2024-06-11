@@ -1,115 +1,117 @@
+"""
+This module provides functions for generating RSA keys, encrypting messages,
+and decrypting messages using RSA cryptography. It implements the generation
+of cryptographically strong prime numbers via the Miller-Rabin primality test
+and uses these primes to create RSA public and private key pairs.
+
+Default keys are set to 1024 bits, but the setting can be changed:
+- more bits: better security / longer computing
+- key bit size = 2 * bit size of the prime numbers (if both are 512 bits, key = 1024)
+
+Functions:
+- generate_n_bit_random(bit_length): Generates a random number of specified bit length.
+- get_low_level_prime(bit_length):
+	Generates a probable prime number not divisible by the first few prime numbers.
+- is_miller_rabin_passed(candidate_prime):
+Determines if a number is likely prime using the Miller-Rabin test.
+- generate_prime(bits): Generates a prime number with a specified number of bits.
+- generate_keys(): Generates RSA public and private keys.
+- encrypt_message(message, public_key): Encrypts a message using the RSA public key.
+- decrypt_message(ciphertext, private_key): Decrypts a message using the RSA private key.
+
+Each function is documented with specific details on their operation and parameters.
+"""
+
 import random
 
-# Pre generated primes
-first_primes_list = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
-					31, 37, 41, 43, 47, 53, 59, 61, 67,
-					71, 73, 79, 83, 89, 97, 101, 103,
-					107, 109, 113, 127, 131, 137, 139,
-					149, 151, 157, 163, 167, 173, 179,
-					181, 191, 193, 197, 199, 211, 223,
-					227, 229, 233, 239, 241, 251, 257,
-					263, 269, 271, 277, 281, 283, 293,
-					307, 311, 313, 317, 331, 337, 347, 349]
+# Pre-generated list of small primes to test divisibility for initial prime candidacy checks
+FIRST_PRIMES_LIST = [
+    2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67,
+    71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149,
+    151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229,
+    233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313,
+    317, 331, 337, 347, 349
+]
 
 
-def n_bit_random(n):
-	#obtian a Random number
-	if n < 2:    
-		raise ValueError("Bit size must be at least 2 to form a valid range")
-    # obtain a Random number
-	return random.randrange(2**(n-1)+1, 2**n - 1)
+def generate_n_bit_random(bit_length):
+    """Generate a random number with a specified bit length."""
+    if bit_length < 2:
+        raise ValueError("Bit size must be at least 2 to form a valid range")
+    return random.randrange(2**(bit_length-1) + 1, 2**bit_length - 1)
+
+def get_low_level_prime(bit_length):
+    """Generate a prime candidate not divisible by first primes."""
+    while True:
+        prime_candidate = generate_n_bit_random(bit_length)
+        for divisor in FIRST_PRIMES_LIST:
+            if prime_candidate % divisor == 0 and divisor**2 <= prime_candidate:
+                break
+        else:
+            return prime_candidate
 
 
-def get_low_level_prime(n):
-	#Generate a prime candidate divisible 
-	#by first primes
-	while True:
-		prime_candidate = n_bit_random(n)
-		# Test divisibility by pre-generated
-		# primes
-		for divisor in first_primes_list:
-			if prime_candidate % divisor == 0 and divisor**2 <= prime_candidate:
-				break
-		else:
-			return prime_candidate
+def is_miller_rabin_passed(candidate_prime):
+    """Perform the Miller-Rabin primality test on a candidate prime number."""
+    max_divisions_by_two = 0
+    remaining = candidate_prime - 1
+    while remaining % 2 == 0:
+        remaining >>= 1
+        max_divisions_by_two += 1
+    assert 2**max_divisions_by_two * remaining == candidate_prime - 1
 
+    def is_composite(test_base):
+        """
+    	Determine if a number is composite (not prime)
+        using the Miller-Rabin primality test conditions.
+    	"""
+        if pow(test_base, remaining, candidate_prime) == 1:
+            return False
+        for i in range(max_divisions_by_two):
+            if pow(test_base, 2**i * remaining, candidate_prime) == candidate_prime - 1:
+                return False
+        return True
 
-def is_miller_rabin_passed(prime_candidate):
-	#Run 20 iterations of Rabin Miller Primality test
-	
-	max_Divisions_By_Two = 0
-	d= prime_candidate-1
-	while d% 2 == 0:
-		d>>= 1
-		max_Divisions_By_Two += 1
-	assert(2**max_Divisions_By_Two * d== prime_candidate-1)
-
-	def is_composite(round_tester):
-		if pow(round_tester, d, prime_candidate) == 1:
-			return False
-		for i in range(max_Divisions_By_Two):
-			if pow(round_tester, 2**i * d, prime_candidate) == prime_candidate-1:
-				return False
-		return True
-
-	# Set number trials 
-	# More iterations = better security, slower process
-	    #This is because, with more trials, the Rabil Miller
-        #can be more probabilistically certain
-	numberOfRabinTrials = 20
-	for i in range(numberOfRabinTrials):
-		round_tester = random.randrange(2, prime_candidate)
-		if is_composite(round_tester):
-			return False
-	return True
-
+    for _ in range(20):  # Number of trials
+        test_base = random.randrange(2, candidate_prime)
+        if is_composite(test_base):
+            return False
+    return True
 
 def generate_prime(bits):
-	while True:
-		prime_candidate = get_low_level_prime(bits)
-		if not is_miller_rabin_passed(prime_candidate):
-			continue
-		else:
-			#print(prime_bits, "bit prime is: \n", prime_candidate)
-			return prime_candidate
+    """Generate a prime number with a given number of bits."""
+    while True:
+        prime_candidate = get_low_level_prime(bits)
+        if is_miller_rabin_passed(prime_candidate):
+            return prime_candidate
+
 
 def generate_keys():
-    p = generate_prime(512) #number of bits of the key
-    q = generate_prime(512)
-    n = p * q
-    phi_n = (p - 1) * (q - 1)
-	
-    # Common choice for e
-    e = 65537
-	
-    # if e and phi_n are coprime = security flaw,
-    #   easy to decrypt
-	# we change keys until that is not happening
-	# we could also just change e instead
-    while (p - 1) * (q - 1) % e == 0:
-        p = generate_prime(512) 
-        q = generate_prime(512)
-    
-    n = p * q
-    phi_n = (p - 1) * (q - 1)
-		
-    # Calculate d, the mod inverse of e under phi(n)
-    d = pow(e, -1, phi_n)
+    """Generate a pair of RSA keys."""
+    prime_p = generate_prime(512)
+    prime_q = generate_prime(512)
+    modulus_n = prime_p * prime_q
+    phi_n = (prime_p - 1) * (prime_q - 1)
+    public_exponent = 65537  # Common choice for public exponent
 
-    # The public key is (e, n) and the private key is (d, n)
-    return ((e, n), (d, n))
+    while phi_n % public_exponent == 0:
+        prime_p = generate_prime(512)
+        prime_q = generate_prime(512)
+        phi_n = (prime_p - 1) * (prime_q - 1)
 
+    private_exponent = pow(public_exponent, -1, phi_n)
+    return (public_exponent, modulus_n), (private_exponent, modulus_n)
 
 def encrypt_message(message, public_key):
-    e, n = public_key
-    # Convert message to an integer for encryption
-    m_int = int.from_bytes(message.encode('utf-8'), 'big')
-    c = pow(m_int, e, n)
-    return c
+    """Encrypt a message using the public key."""
+    public_exponent, modulus_n = public_key
+    message_int = int.from_bytes(message.encode('utf-8'), 'big')
+    ciphertext = pow(message_int, public_exponent, modulus_n)
+    return ciphertext
 
 def decrypt_message(ciphertext, private_key):
-    d, n = private_key
-    m_int = pow(ciphertext, d, n)
-    # Convert integer back to string
-    message = m_int.to_bytes((m_int.bit_length() + 7) // 8, 'big').decode('utf-8')
+    """Decrypt a message using the private key."""
+    private_exponent, modulus_n = private_key
+    message_int = pow(ciphertext, private_exponent, modulus_n)
+    message = message_int.to_bytes((message_int.bit_length() + 7) // 8, 'big').decode('utf-8')
     return message
