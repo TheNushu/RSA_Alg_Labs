@@ -24,6 +24,10 @@ WARNING:
 * if you wish to encrypt multiple words, you'll need to restart the app before each decryption
 * I am sorry for this, I am looking to fix the issue
 
+* Update: bug fixed; make sure to clear that the fields of keys and encrypted text are free before pasting
+	This ensures that you use the correct values and you do not get confused by the weird UI where you
+	cannot see the whole text
+
 Other problems:
 
 * code might not be fully suitable with good python practice because I had problems setting up pylint
