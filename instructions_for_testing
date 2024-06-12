@@ -30,8 +30,8 @@ WARNING:
 
 Other problems:
 
-* code might not be fully suitable with good python practice because I had problems setting up pylint
-	*also problems with coverage
+* the unitesting code might not be Python pep8 suitable since I had problems setting up coverage in the past
+	* edited the app and functionality scripts, but didn't edit the test code yet
 * some comments might not be clear enough
 * probably some other bugs lie around since unitests don't get approved 
 * I will need to switch the "random" library with "secrets", such that it can be cryptographically secured (random numbers from random library can be predicted)
