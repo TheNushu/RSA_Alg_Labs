@@ -36,8 +36,8 @@ FIRST_PRIMES_LIST = [
 
 def generate_n_bit_random(bit_length):
     """Generate a random number with a specified bit length."""
-    if bit_length < 2:
-        raise ValueError("Bit size must be at least 2 to form a valid range")
+    if bit_length < 4:
+        raise ValueError("Bit size must be at least 4 to form a valid range")
     return random.randrange(2**(bit_length-1) + 1, 2**bit_length - 1)
 
 def get_low_level_prime(bit_length):
@@ -104,6 +104,16 @@ def generate_keys():
 
 def encrypt_message(message, public_key):
     """Encrypt a message using the public key."""
+    if not isinstance(message, str):
+        raise TypeError("The message should be a string")
+    
+    if not isinstance(public_key, tuple) or len(public_key) != 2:
+        raise TypeError("The public key must be a tuple of two integers (e, n)")
+
+    public_exponent, modulus_n = public_key
+    if not (isinstance(public_exponent, int) and isinstance(modulus_n, int)):
+        raise TypeError("Both public exponent and modulus must be integers")
+
     public_exponent, modulus_n = public_key
     message_int = int.from_bytes(message.encode('utf-8'), 'big')
     ciphertext = pow(message_int, public_exponent, modulus_n)
@@ -111,7 +121,14 @@ def encrypt_message(message, public_key):
 
 def decrypt_message(ciphertext, private_key):
     """Decrypt a message using the private key."""
+    
+    if not isinstance(private_key, tuple) or len(private_key) != 2:
+        raise TypeError("The public key must be a tuple of two integers (e, n)")
+
     private_exponent, modulus_n = private_key
+    if not (isinstance(private_exponent, int) and isinstance(modulus_n, int)):
+        raise TypeError("Both public exponent and modulus must be integers")
+    
     message_int = pow(ciphertext, private_exponent, modulus_n)
     message = message_int.to_bytes((message_int.bit_length() + 7) // 8, 'big').decode('utf-8')
     return message
