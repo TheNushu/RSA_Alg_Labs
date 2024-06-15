@@ -73,7 +73,7 @@ def decrypt_wrapper():
         encrypted_int = int(encrypted_text)
         decrypted_message = decrypt_message(encrypted_int, private_key)
         OUTPUT_TEXT.set(decrypted_message)
-        
+
     except ValueError as value_error:
         OUTPUT_TEXT.set(f"Invalid private key or ciphertext format."
                         f"Please ensure proper format. Error: {str(value_error)}")

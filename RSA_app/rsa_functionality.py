@@ -106,7 +106,7 @@ def encrypt_message(message, public_key):
     """Encrypt a message using the public key."""
     if not isinstance(message, str):
         raise TypeError("The message should be a string")
-    
+
     if not isinstance(public_key, tuple) or len(public_key) != 2:
         raise TypeError("The public key must be a tuple of two integers (e, n)")
 
@@ -121,14 +121,14 @@ def encrypt_message(message, public_key):
 
 def decrypt_message(ciphertext, private_key):
     """Decrypt a message using the private key."""
-    
+
     if not isinstance(private_key, tuple) or len(private_key) != 2:
         raise TypeError("The public key must be a tuple of two integers (e, n)")
 
     private_exponent, modulus_n = private_key
     if not (isinstance(private_exponent, int) and isinstance(modulus_n, int)):
         raise TypeError("Both public exponent and modulus must be integers")
-    
+
     message_int = pow(ciphertext, private_exponent, modulus_n)
     message = message_int.to_bytes((message_int.bit_length() + 7) // 8, 'big').decode('utf-8')
     return message
