@@ -15,8 +15,8 @@
 		* used random.SystemRandom() instead of random.randrange
 			* the initial plan was to use secrets library, but that proved to be troublesome
 				* had only upperbound functionality, without lowerbound parameter for generating a random number (needed to have random numbers with specific number of bits)
-			* after frustration of trying to implement such behaivour, I stumbled upon the following StackOverflow post: [Ranged secure random number](https://stackoverflow.com/questions/20936993/how-can-i-create-a-random-number-that-is-cryptographically-secure-in-python)!
-				* tl;dr: random.SystemRandom is secure and has range functionalityhttps://stackoverflow.com/questions/20936993/how-can-i-create-a-random-number-that-is-cryptographically-secure-in-python
+			* after frustration of trying to implement such behaivour, I stumbled upon the following StackOverflow post: [Ranged secure random number](https://stackoverflow.com/questions/20936993/how-can-i-create-a-random-number-that-is-cryptographically-secure-in-python)
+				* tl;dr: random.SystemRandom is secure and has range functionality
 	* improved roboustness:
 		* not accepting empty strings for encryption/decryption
 	* code readability:
