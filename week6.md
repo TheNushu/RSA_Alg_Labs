@@ -16,15 +16,14 @@
 			* the initial plan was to use secrets library, but that proved to be troublesome
 				* had only upperbound functionality, without lowerbound parameter for generating a random number (needed to have random numbers with specific number of bits)
 			* after frustration of trying to implement such behaivour, I stumbled upon the following StackOverflow post: [Ranged secure random number](https://stackoverflow.com/questions/20936993/how-can-i-create-a-random-number-that-is-cryptographically-secure-in-python)
-				* tl;dr: random.SystemRandom is secure and has range functionality
+				* tl;dr: random.SystemRandom() is secure and has range functionality
 	* improved roboustness:
 		* not accepting empty strings for encryption/decryption
 	* code readability:
 		* thanks to a peer review comment, some code redudancy got removed
 	* tried to implement padding using OAEP padding from cryptography library to test first, with later plans to implement my own version of padding system
 		* NOTE:  because this was not yet functional, I didn't include it in the pushed version of the project
-		* QUESTION: should this functionality also be implemented by me (as in, using own code instead of already written code), or is it fine to use a library function given the aims of the project and course's
-			* if I invest enough time before the demo, I think that this should be doable
+		* QUESTION: 
 
 * This week I learned:
 	* from the peer review:
@@ -56,4 +55,5 @@
 
 * Question:
 	* Are my weekly reports and peer reviews too long? Should I be more concise/less detailed?
-	* The question mentioned about OAEP implementation in "This week I did" last line
+	* Should the functionality of padding also be implemented by me (as in, using own code instead of already written code), or is it fine to use a library function given the aims of the project and course's
+		* if I invest enough time before the demo, I think that this should be doable, but I won't make it a priority task considering the tight time frame
