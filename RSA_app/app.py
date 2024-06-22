@@ -32,12 +32,15 @@ def copy_to_clipboard(text):
     ROOT.clipboard_clear()
     ROOT.clipboard_append(text)
     ROOT.update()
+    OUTPUT_LABEL.config(fg='black')
     OUTPUT_TEXT.set("Your key has been copied to your clipboard.\n\n"
                     "Please save it somewhere to not lose it.")
 
 def encrypt_wrapper():
+    
     """Wraps the text and public key to send to the encryption function in RSA logic.
     Retrieves the result that is the encrypted text and copies it to clipboard."""
+    OUTPUT_LABEL.config(fg='black')
 
     input_text = ENTRY_ENCRYPT.get()
     public_key_str = ENTRY_PUB_KEY.get() #This is a string, for example "65537 12345678901234567890"
@@ -55,6 +58,7 @@ def encrypt_wrapper():
         OUTPUT_TEXT.set(f"The text has been encrypted and copied to your clipboard:"
                         f"{str(encrypted_message)[:15]}...")
     except ValueError as val_err:
+        OUTPUT_LABEL.config(fg='red')
         OUTPUT_TEXT.set(f"Invalid public key format."
                         f"Please enter as 'e n'. Error: {str(val_err)}")
 
@@ -62,6 +66,7 @@ def decrypt_wrapper():
     """Wraps the encrypted text and private key to send to the decryption function in RSA logic.
     Retrieves the result that is the decrypted text."""
 
+    OUTPUT_LABEL.config(fg='black')
     encrypted_text = ENTRY_DECRYPT.get()
     private_key_str = ENTRY_PRIV_KEY.get()
 
@@ -75,6 +80,7 @@ def decrypt_wrapper():
         OUTPUT_TEXT.set(decrypted_message)
 
     except ValueError as value_error:
+        OUTPUT_LABEL.config(fg='red')
         OUTPUT_TEXT.set(f"Invalid private key or ciphertext format."
                         f"Please ensure proper format. Error: {str(value_error)}")
 
@@ -133,26 +139,37 @@ GENERATE_KEYS_BUTTON = tk.Button(ROOT,
 
 # Layout widgets
 ENCRYPT_TEXT.grid(row=0, column=0, padx=10, pady=10)
-ENTRY_ENCRYPT.grid(row=0, column=1, padx=10, pady=10)
+ENTRY_ENCRYPT.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
 PUBLIC_KEY.grid(row=1, column=0, padx=10, pady=10)
-ENTRY_PUB_KEY.grid(row=1, column=1, padx=10, pady=10)
+ENTRY_PUB_KEY.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
 DECRYPT_TEXT.grid(row=2, column=0, padx=10, pady=10)
-ENTRY_DECRYPT.grid(row=2, column=1, padx=10, pady=10)
+ENTRY_DECRYPT.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
 PRIV_KEY_TEXT.grid(row=3, column=0, padx=10, pady=10)
-ENTRY_PRIV_KEY.grid(row=3, column=1, padx=10, pady=10)
+ENTRY_PRIV_KEY.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
 
 ENCRYPT_BUTTON.grid(row=0, column=2, padx=10, pady=10)
 DECRYPT_BUTTON.grid(row=2, column=2, padx=10, pady=10)
 GENERATE_KEYS_BUTTON.grid(row=4, column=1, padx=10, pady=10)
 
 PUB_KEY_LABEL.grid(row=6, column=0, padx=10, pady=10)
-ENTRY_PUB.grid(row=6, column=1, padx=10, pady=10)
+ENTRY_PUB.grid(row=6, column=1, padx=10, pady=10,sticky="nsew")
 COPY_PUB_KEY_BUTTON.grid(row=6, column=2, padx=10, pady=10)
 PRIV_KEY_LABEL.grid(row=7, column=0, padx=10, pady=10)
-ENTRY_PRIV.grid(row=7, column=1, padx=10, pady=10)
+ENTRY_PRIV.grid(row=7, column=1, padx=10, pady=10,sticky="nsew")
 COPY_PRIV_KEY_BUTTON.grid(row=7, column=2, padx=10, pady=10)
 
 OUTPUT_LABEL.grid(row=5, column=0, columnspan=3, padx=10, pady=10)
+
+# Make the application full-screen
+
+screen_width = ROOT.winfo_screenwidth()
+screen_height = ROOT.winfo_screenheight()
+ROOT.geometry(f'{screen_width}x{screen_height}+0+0')
+
+for i in range(8):
+    ROOT.grid_rowconfigure(i, weight=1)
+for j in range(3):
+    ROOT.grid_columnconfigure(j, weight=1)
 
 # Start the GUI event loop
 ROOT.mainloop()
