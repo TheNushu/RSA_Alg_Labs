@@ -23,6 +23,7 @@ Each function is documented with specific details on their operation and paramet
 """
 
 import random
+import secrets
 
 # Pre-generated list of small primes to test divisibility for initial prime candidacy checks
 FIRST_PRIMES_LIST = [
@@ -38,7 +39,9 @@ def generate_n_bit_random(bit_length):
     """Generate a random number with a specified bit length."""
     if bit_length < 4:
         raise ValueError("Bit size must be at least 4 to form a valid range")
-    return random.randrange(2**(bit_length-1) + 1, 2**bit_length - 1)
+    
+    system_random = random.SystemRandom()
+    return system_random.randint(2**(bit_length-1) + 1, 2**bit_length - 1)
 
 def get_low_level_prime(bit_length):
     """Generate a prime candidate not divisible by first primes."""
@@ -88,22 +91,25 @@ def generate_prime(bits):
 
 def generate_keys():
     """Generate a pair of RSA keys."""
-    prime_p = generate_prime(512)
-    prime_q = generate_prime(512)
-    modulus_n = prime_p * prime_q
-    phi_n = (prime_p - 1) * (prime_q - 1)
     public_exponent = 65537  # Common choice for public exponent
 
-    while phi_n % public_exponent == 0:
+    while True:
         prime_p = generate_prime(512)
         prime_q = generate_prime(512)
+        modulus_n = prime_p * prime_q
         phi_n = (prime_p - 1) * (prime_q - 1)
+        if phi_n % public_exponent != 0:
+            break
 
     private_exponent = pow(public_exponent, -1, phi_n)
     return (public_exponent, modulus_n), (private_exponent, modulus_n)
 
 def encrypt_message(message, public_key):
     """Encrypt a message using the public key."""
+    
+    if len(message) <= 0 or str.isspace(message):
+        raise ValueError("Message must be non-empty.")    
+
     if not isinstance(message, str):
         raise TypeError("The message should be a string")
 
@@ -121,6 +127,10 @@ def encrypt_message(message, public_key):
 
 def decrypt_message(ciphertext, private_key):
     """Decrypt a message using the private key."""
+    
+    string_cipher = str(ciphertext)
+    if len(string_cipher) <= 0 or str.isspace(string_cipher):
+        raise ValueError("Message must be non-empty.") 
 
     if not isinstance(private_key, tuple) or len(private_key) != 2:
         raise TypeError("The public key must be a tuple of two integers (e, n)")
