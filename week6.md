@@ -23,7 +23,6 @@
 		* thanks to a peer review comment, some code redudancy got removed
 	* tried to implement padding using OAEP padding from cryptography library to test first, with later plans to implement my own version of padding system
 		* NOTE:  because this was not yet functional, I didn't include it in the pushed version of the project
-		* QUESTION: 
 
 * This week I learned:
 	* from the peer review:
