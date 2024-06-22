@@ -21,7 +21,7 @@ class TestRSAGeneration(unittest.TestCase):
             rand_num = generate_n_bit_random(n)
             self.assertTrue(
                 2**(n-1) <= rand_num < 2**n,
-                f"Failed for bit length: {n}"
+                f"Failed for bit length: {n}. Number has {rand_num.bit_length()} bits instead of {n} bits."
             )
 
     def test_low_level_prime_generation(self):
@@ -36,12 +36,12 @@ class TestRSAGeneration(unittest.TestCase):
             )
 
     def test_miller_rabin(self):
-
+        """Test if miller-rabin test outputs correctly for known primes/non-primes."""
         primes= [101,
-                  2147483647,
-                  100000004749,
-                  24815323469403931728221172233738523533528335161133543380459461440894543366372904768334987264000000000000000000479,
-                  ]
+                 2147483647,
+                 100000004749,
+                 24815323469403931728221172233738523533528335161133543380459461440894543366372904768334987264000000000000000000479,
+                ]
 
         non_primes= [87,
                      98764321234,
@@ -86,9 +86,11 @@ class TestRSAGeneration(unittest.TestCase):
             encrypt_message(12345, (65537, 99991))  # Non-string message input
             encrypt_message("Meow", "Woof") # Non-tuple public key
             encrypt_message("Meow", ("Woof", "Quack")) # Non-int key
+            encrypt_message("", (65537, 99991))  # Empty string
 
             decrypt_message("Meow", "Woof") # Non-tuple public key
             decrypt_message("Meow", ("Woof", "Quack")) # Non-int key
+            decrypt_message("", (65537, 99991)) # Empty string
     """
     def test_generate_keys(self):
         public_key, private_key = generate_keys()
