@@ -10,13 +10,13 @@ from rsa_functionality import (
     decrypt_message
 )
 
+bits = [4, 256, 512, 1024]
 
 class TestRSAGeneration(unittest.TestCase):
     """Unit tests for RSA key generation and encryption functionality."""
 
     def test_n_bit_random(self):
         """Test random number generation for various bit lengths."""
-        bits = [4, 256, 512, 1024]
         for n in bits:
             rand_num = generate_n_bit_random(n)
             self.assertTrue(
@@ -26,7 +26,6 @@ class TestRSAGeneration(unittest.TestCase):
 
     def test_low_level_prime_generation(self):
         """Test the generation of low-level prime numbers."""
-        bits = [4, 256, 512, 1024]
 
         for n in bits:
             prime = get_low_level_prime(n)
@@ -91,16 +90,22 @@ class TestRSAGeneration(unittest.TestCase):
             decrypt_message("Meow", "Woof") # Non-tuple public key
             decrypt_message("Meow", ("Woof", "Quack")) # Non-int key
             decrypt_message("", (65537, 99991)) # Empty string
-    """
+    
     def test_generate_keys(self):
-        public_key, private_key = generate_keys()
-        e, n = public_key
-        d, _ = private_key
-        phi_n = n - (e * d % n)
-        self.assertEqual(
-            e * d % phi_n, 1,
-            "Public and private keys are not inverses modulo φ(n)"
-        )
-    """
+
+        for b in bits:
+            public_key, private_key = generate_keys(b)
+            e, n = public_key
+            d, _ = private_key
+
+            self.assertEqual(e, 65537, "Public exponent e is not 65537")
+            self.assertGreaterEqual(n.bit_length(),
+                            b,
+                            "Modulus n is not {b} bits in length")
+            self.assertTrue(d.bit_length() >= b, 
+                            f"Private exponent d should be at least {b} bits, got {d.bit_length()} bits. {n.bit_length()}")
+
+#23.06.24 05:52 am: coverage report 89%
+
 if __name__ == '__main__':
     unittest.main()
