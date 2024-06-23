@@ -23,7 +23,6 @@ Each function is documented with specific details on their operation and paramet
 """
 
 import random
-import secrets
 
 # Pre-generated list of small primes to test divisibility for initial prime candidacy checks
 FIRST_PRIMES_LIST = [
@@ -89,13 +88,13 @@ def generate_prime(bits):
             return prime_candidate
 
 
-def generate_keys():
+def generate_keys(bits):
     """Generate a pair of RSA keys."""
     public_exponent = 65537  # Common choice for public exponent
 
     while True:
-        prime_p = generate_prime(512)
-        prime_q = generate_prime(512)
+        prime_p = generate_prime(bits // 2) # if user wants n bit key
+        prime_q = generate_prime(bits // 2) # each prime should be half of that
         modulus_n = prime_p * prime_q
         phi_n = (prime_p - 1) * (prime_q - 1)
         if phi_n % public_exponent != 0:
@@ -112,7 +111,7 @@ def encrypt_message(message, public_key):
 
     if not isinstance(message, str):
         raise TypeError("The message should be a string")
-
+ 
     if not isinstance(public_key, tuple) or len(public_key) != 2:
         raise TypeError("The public key must be a tuple of two integers (e, n)")
 
