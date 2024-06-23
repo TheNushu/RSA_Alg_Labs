@@ -93,8 +93,11 @@ def generate_keys(bits):
     public_exponent = 65537  # Common choice for public exponent
 
     while True:
-        prime_p = generate_prime(bits // 2) # if user wants n bit key
-        prime_q = generate_prime(bits // 2) # each prime should be half of that
+        prime_p = generate_prime(bits // 2 + 8) # if user wants n bit key
+        prime_q = generate_prime(bits // 2 + 8) # each prime should be half of that
+                                                # add 8 bits to account for loss in
+                                                # multiplications
+        
         modulus_n = prime_p * prime_q
         phi_n = (prime_p - 1) * (prime_q - 1)
         if phi_n % public_exponent != 0:
