@@ -71,7 +71,7 @@ class TestRSAGeneration(unittest.TestCase):
 
     def test_encryption_decryption(self):
         message = "Test message 12!.'s@[]"
-        public_key, private_key = generate_keys()
+        public_key, private_key = generate_keys(1024)
         encrypted = encrypt_message(message, public_key)
         decrypted = decrypt_message(encrypted, private_key)
         self.assertEqual(
