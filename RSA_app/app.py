@@ -37,13 +37,20 @@ def copy_to_clipboard(text):
                     "Please save it somewhere to not lose it.")
 
 def encrypt_wrapper():
-    
     """Wraps the text and public key to send to the encryption function in RSA logic.
     Retrieves the result that is the encrypted text and copies it to clipboard."""
     OUTPUT_LABEL.config(fg='black')
+    input_text = ENTRY_ENCRYPT.get("1.0","end-1c")
+    text_bits = len(input_text.encode('utf-8'))
+    key_bits = int(KEY_BITS.get('1.0', 'end-1c'))
 
-    input_text = ENTRY_ENCRYPT.get()
-    public_key_str = ENTRY_PUB_KEY.get() #This is a string, for example "65537 12345678901234567890"
+    if text_bits >= key_bits:
+        OUTPUT_LABEL.config(fg='red')
+        OUTPUT_TEXT.set(f"Input text is {text_bits} bits, which a {key_bits} bit key cannot encrypt."
+                        f"Please decrease input text or use bigger keys.")
+        return
+
+    public_key_str = ENTRY_PUB_KEY.get("1.0","end-1c") #This is a string, for example "65537 12345678901234567890"
 
     try:
         e_str, n_str = public_key_str.split()
@@ -59,16 +66,15 @@ def encrypt_wrapper():
                         f"{str(encrypted_message)[:15]}...")
     except ValueError as val_err:
         OUTPUT_LABEL.config(fg='red')
-        OUTPUT_TEXT.set(f"Invalid public key format."
-                        f"Please enter as 'e n'. Error: {str(val_err)}")
+        OUTPUT_TEXT.set(f"Invalid public key format.")
 
 def decrypt_wrapper():
     """Wraps the encrypted text and private key to send to the decryption function in RSA logic.
     Retrieves the result that is the decrypted text."""
 
     OUTPUT_LABEL.config(fg='black')
-    encrypted_text = ENTRY_DECRYPT.get()
-    private_key_str = ENTRY_PRIV_KEY.get()
+    encrypted_text = ENTRY_DECRYPT.get("1.0","end-1c")
+    private_key_str = ENTRY_PRIV_KEY.get("1.0","end-1c")
 
     try:
         d_str, n_str = private_key_str.split()
@@ -82,64 +88,73 @@ def decrypt_wrapper():
     except ValueError as value_error:
         OUTPUT_LABEL.config(fg='red')
         OUTPUT_TEXT.set(f"Invalid private key or ciphertext format."
-                        f"Please ensure proper format. Error: {str(value_error)}")
+                        f"Please ensure proper format.")
 
 def generate_and_show_keys():
     """Calls the key generation functions of the RSA logic and returns the keys."""
-    ROOT.public_key, ROOT.private_key = generate_keys()
+    OUTPUT_LABEL.config(fg='black')
+    bits = int(KEY_BITS.get("1.0","end-1c"))
+    if bits % 2 != 0:
+        OUTPUT_LABEL.config(fg='red')
+        OUTPUT_TEXT.set(f"Key size should be a power of 2.")
+        return
+    ROOT.public_key, ROOT.private_key = generate_keys(bits)
     messagebox.showinfo("Warning!", "Please do not share your private key!")
 
-    ENTRY_PUB.delete(0, 'end')
-    ENTRY_PRIV.delete(0, 'end')
+    ENTRY_PUB.delete('1.0', 'end')
+    ENTRY_PRIV.delete('1.0', 'end')
 
-    ENTRY_PUB.insert(0, ROOT.public_key)
-    ENTRY_PRIV.insert(0, ROOT.private_key)
+    ENTRY_PUB.insert('end', ROOT.public_key)
+    ENTRY_PRIV.insert('end', ROOT.private_key)
 
 # Create the main window
 ROOT = tk.Tk()
 ROOT.title("Save my secret!!")
 
-OUTPUT_TEXT = tk.StringVar()
+OUTPUT_TEXT = tk.StringVar(ROOT, "Your text to be encrypted must have a smaller size (in bits) than the key size.")
 OUTPUT_LABEL = tk.Label(ROOT, textvariable=OUTPUT_TEXT)
 
 # Create widgets
 ENCRYPT_TEXT = tk.Label(ROOT, text="Enter a string to encrypt:")
-ENTRY_ENCRYPT = tk.Entry(ROOT, width=40)
+ENTRY_ENCRYPT = tk.Text(ROOT, width=60, height=7)
 
 PUBLIC_KEY = tk.Label(ROOT, text="Enter public key:")
-ENTRY_PUB_KEY = tk.Entry(ROOT, width=40)
+ENTRY_PUB_KEY = tk.Text(ROOT, width=60, height=7)
 
 # Button for encryption, sending text to encrypt and public key
 ENCRYPT_BUTTON = tk.Button(ROOT, text="Encrypt", command=encrypt_wrapper)
 
 DECRYPT_TEXT = tk.Label(ROOT, text="Enter string to decrypt:")
-ENTRY_DECRYPT = tk.Entry(ROOT, width=40)
+ENTRY_DECRYPT = tk.Text(ROOT, width=60, height=7)
 
 PRIV_KEY_TEXT = tk.Label(ROOT, text="Enter private key:")
-ENTRY_PRIV_KEY = tk.Entry(ROOT, width=40)
+ENTRY_PRIV_KEY = tk.Text(ROOT, width=60, height=7)
 
 PUB_KEY_LABEL = tk.Label(ROOT, text="Your Public key:")
-ENTRY_PUB = tk.Entry(ROOT, width=40)
+ENTRY_PUB = tk.Text(ROOT, width=60, height=5)
 
 PRIV_KEY_LABEL = tk.Label(ROOT, text="Your Private key:")
-ENTRY_PRIV = tk.Entry(ROOT, width=40)
+ENTRY_PRIV = tk.Text(ROOT, width=60, height=5)
 
 DECRYPT_BUTTON = tk.Button(ROOT, text="Decrypt", command=decrypt_wrapper)
 
 COPY_PUB_KEY_BUTTON = tk.Button(ROOT,
                                 text="Copy Public Key",
-                                command=lambda: copy_to_clipboard(ENTRY_PUB.get()))
+                                command=lambda: copy_to_clipboard(ENTRY_PUB.get("1.0","end-1c")))
 COPY_PRIV_KEY_BUTTON = tk.Button(ROOT,
                                  text="Copy Private Key",
-                                 command=lambda: copy_to_clipboard(ENTRY_PRIV.get()))
+                                 command=lambda: copy_to_clipboard(ENTRY_PRIV.get("1.0","end-1c")))
 
 GENERATE_KEYS_BUTTON = tk.Button(ROOT,
-                                 text="Generate Encryption Keys",
+                                 text="Generate Encryption Keys with size (in bits): ",
                                  command=generate_and_show_keys)
+
+KEY_BITS = tk.Text(ROOT, width=6, height=1)
+KEY_BITS.insert('end', '1024') # default key size is 1024 bits
 
 # Layout widgets
 ENCRYPT_TEXT.grid(row=0, column=0, padx=10, pady=10)
-ENTRY_ENCRYPT.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+ENTRY_ENCRYPT.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
 PUBLIC_KEY.grid(row=1, column=0, padx=10, pady=10)
 ENTRY_PUB_KEY.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
 DECRYPT_TEXT.grid(row=2, column=0, padx=10, pady=10)
@@ -149,7 +164,9 @@ ENTRY_PRIV_KEY.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
 
 ENCRYPT_BUTTON.grid(row=0, column=2, padx=10, pady=10)
 DECRYPT_BUTTON.grid(row=2, column=2, padx=10, pady=10)
-GENERATE_KEYS_BUTTON.grid(row=4, column=1, padx=10, pady=10)
+GENERATE_KEYS_BUTTON.grid(row=4, column=1, padx=(10, 0), pady=10, sticky='w')
+KEY_BITS.grid(row=4, column=1, padx=(350, 10), pady=10, sticky='w')
+
 
 PUB_KEY_LABEL.grid(row=6, column=0, padx=10, pady=10)
 ENTRY_PUB.grid(row=6, column=1, padx=10, pady=10,sticky="nsew")
