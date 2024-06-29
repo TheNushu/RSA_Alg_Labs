@@ -10,7 +10,7 @@ Default keys are set to 1024 bits, but the setting can be changed:
 
 Functions:
 - generate_n_bit_random(bit_length): Generates a random number of specified bit length.
-- get_low_level_prime(bit_length):
+- gen_prime_candidate(bit_length):
 	Generates a probable prime number not divisible by the first few prime numbers.
 - is_miller_rabin_passed(candidate_prime):
 Determines if a number is likely prime using the Miller-Rabin test.
@@ -18,8 +18,6 @@ Determines if a number is likely prime using the Miller-Rabin test.
 - generate_keys(): Generates RSA public and private keys.
 - encrypt_message(message, public_key): Encrypts a message using the RSA public key.
 - decrypt_message(ciphertext, private_key): Decrypts a message using the RSA private key.
-
-Each function is documented with specific details on their operation and parameters.
 """
 
 import random
@@ -33,17 +31,21 @@ FIRST_PRIMES_LIST = [
     317, 331, 337, 347, 349
 ]
 
-
 def generate_n_bit_random(bit_length):
     """Generate a random number with a specified bit length."""
-    if bit_length < 4:
-        raise ValueError("Bit size must be at least 4 to form a valid range")
-    
+    if isinstance(bit_length, int) is not True:
+        raise ValueError("Bit size must be an integer.")
+
+    if bit_length < 8:
+        raise ValueError(f"Bit size must be at least 8 to form "
+                         f"a valid value for the keys, got {bit_length}")
+
     system_random = random.SystemRandom()
     return system_random.randint(2**(bit_length-1) + 1, 2**bit_length - 1)
 
-def get_low_level_prime(bit_length):
+def gen_prime_candidate(bit_length):
     """Generate a prime candidate not divisible by first primes."""
+
     while True:
         prime_candidate = generate_n_bit_random(bit_length)
         for divisor in FIRST_PRIMES_LIST:
@@ -52,13 +54,20 @@ def get_low_level_prime(bit_length):
         else:
             return prime_candidate
 
-
 def is_miller_rabin_passed(candidate_prime):
     """Perform the Miller-Rabin primality test on a candidate prime number."""
+    # note, the check if it is a small prime number
+    # is done in gen_prime_candidate()
+    if isinstance(candidate_prime, int) is not True:
+        raise ValueError("Candidate prime must be an integer.")
+
+    if candidate_prime % 2 == 0:
+        return False
+
     max_divisions_by_two = 0
     remaining = candidate_prime - 1
     while remaining % 2 == 0:
-        remaining >>= 1
+        remaining = remaining // 2
         max_divisions_by_two += 1
     assert 2**max_divisions_by_two * remaining == candidate_prime - 1
 
@@ -74,8 +83,9 @@ def is_miller_rabin_passed(candidate_prime):
                 return False
         return True
 
+    system_random = random.SystemRandom()
     for _ in range(20):  # Number of trials
-        test_base = random.randrange(2, candidate_prime)
+        test_base = system_random.randint(2, candidate_prime - 1)
         if is_composite(test_base):
             return False
     return True
@@ -83,22 +93,29 @@ def is_miller_rabin_passed(candidate_prime):
 def generate_prime(bits):
     """Generate a prime number with a given number of bits."""
     while True:
-        prime_candidate = get_low_level_prime(bits)
+        prime_candidate = gen_prime_candidate(bits)
         if is_miller_rabin_passed(prime_candidate):
             return prime_candidate
-
 
 def generate_keys(bits):
     """Generate a pair of RSA keys."""
     public_exponent = 65537  # Common choice for public exponent
+    if isinstance(bits, int) is not True:
+        raise TypeError("Bit size must be an integer.")
 
+    if bits < 8:
+        raise ValueError(f"Bit size must be at least 8 to form "
+                         f"a valid value for the keys, got {bits}")
     while True:
-        prime_p = generate_prime(bits // 2 + 8) # if user wants n bit key
-        prime_q = generate_prime(bits // 2 + 8) # each prime should be half of that
-                                                # add 8 bits to account for loss in
-                                                # multiplications
-        
-        modulus_n = prime_p * prime_q
+        #ensure bit length of modulus as desired
+        while True:
+            prime_p = generate_prime(bits // 2) # e.g. for a 1024 bit key size
+            prime_q = generate_prime(bits // 2) # each prime needs to be 512 bits
+
+            modulus_n = prime_p * prime_q
+            if modulus_n.bit_length() == bits:
+                break
+
         phi_n = (prime_p - 1) * (prime_q - 1)
         if phi_n % public_exponent != 0:
             break
@@ -108,13 +125,13 @@ def generate_keys(bits):
 
 def encrypt_message(message, public_key):
     """Encrypt a message using the public key."""
-    
+
     if len(message) <= 0 or str.isspace(message):
-        raise ValueError("Message must be non-empty.")    
+        raise TypeError("Message must be non-empty.")
 
     if not isinstance(message, str):
         raise TypeError("The message should be a string")
- 
+
     if not isinstance(public_key, tuple) or len(public_key) != 2:
         raise TypeError("The public key must be a tuple of two integers (e, n)")
 
@@ -122,17 +139,26 @@ def encrypt_message(message, public_key):
     if not (isinstance(public_exponent, int) and isinstance(modulus_n, int)):
         raise TypeError("Both public exponent and modulus must be integers")
 
-    public_exponent, modulus_n = public_key
+    modulus_bit_length = modulus_n.bit_length()
     message_int = int.from_bytes(message.encode('utf-8'), 'big')
+    message_bit_length = message_int.bit_length()
+
+    # Check if the message bit length is less than the modulus bit length
+    if message_bit_length >= modulus_bit_length:
+        raise ValueError(f"The message is too long ({message_bit_length} bits) to be encrypted"
+                         f"with the given key ({modulus_bit_length}) bits."
+                         f"Please either reduce the message size or use a bigger key.")
+
     ciphertext = pow(message_int, public_exponent, modulus_n)
     return ciphertext
 
 def decrypt_message(ciphertext, private_key):
     """Decrypt a message using the private key."""
-    
+
     string_cipher = str(ciphertext)
+
     if len(string_cipher) <= 0 or str.isspace(string_cipher):
-        raise ValueError("Message must be non-empty.") 
+        raise TypeError("Message must be non-empty.")
 
     if not isinstance(private_key, tuple) or len(private_key) != 2:
         raise TypeError("The public key must be a tuple of two integers (e, n)")
@@ -141,6 +167,15 @@ def decrypt_message(ciphertext, private_key):
     if not (isinstance(private_exponent, int) and isinstance(modulus_n, int)):
         raise TypeError("Both public exponent and modulus must be integers")
 
+    modulus_bit_length = modulus_n.bit_length()
     message_int = pow(ciphertext, private_exponent, modulus_n)
+    message_bit_length = message_int.bit_length()
+
+    # Check if the message bit length is less than the modulus bit length
+    if message_bit_length >= modulus_bit_length:
+        raise ValueError(f"The message is too long ({message_bit_length} bits) to be encrypted"
+                         f"with the given key ({modulus_bit_length}) bits."
+                         f"Please either reduce the message size or use a bigger key.")
+
     message = message_int.to_bytes((message_int.bit_length() + 7) // 8, 'big').decode('utf-8')
     return message

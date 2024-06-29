@@ -10,7 +10,6 @@ The application provides functionality to:
 
 Users can input strings directly and perform encryption or decryption operations.
 Keys are displayed in the GUI and can be regenerated as needed.
-This tool is intended for educational purposes to demonstrate RSA operations.
 
 Functions:
 - COPY_TO_CLIPBOARD(text): Copies the provided text to the clipboard.
@@ -20,7 +19,7 @@ Functions:
 
 Author: Daniel-Ioan Mlesnita
 Date: 11.06.2024
-Version: 0.5
+Version: 1.0
 """
 
 import tkinter as tk
@@ -41,16 +40,9 @@ def encrypt_wrapper():
     Retrieves the result that is the encrypted text and copies it to clipboard."""
     OUTPUT_LABEL.config(fg='black')
     input_text = ENTRY_ENCRYPT.get("1.0","end-1c")
-    text_bits = len(input_text.encode('utf-8'))
-    key_bits = int(KEY_BITS.get('1.0', 'end-1c'))
 
-    if text_bits >= key_bits:
-        OUTPUT_LABEL.config(fg='red')
-        OUTPUT_TEXT.set(f"Input text is {text_bits} bits, which a {key_bits} bit key cannot encrypt."
-                        f"Please decrease input text or use bigger keys.")
-        return
-
-    public_key_str = ENTRY_PUB_KEY.get("1.0","end-1c") #This is a string, for example "65537 12345678901234567890"
+    #This is a string, for example "65537 12345678901234567890"
+    public_key_str = ENTRY_PUB_KEY.get("1.0","end-1c")
 
     try:
         e_str, n_str = public_key_str.split()
@@ -64,9 +56,9 @@ def encrypt_wrapper():
         ROOT.update()
         OUTPUT_TEXT.set(f"The text has been encrypted and copied to your clipboard:"
                         f"{str(encrypted_message)[:15]}...")
-    except ValueError as val_err:
+    except ValueError as err_message:
         OUTPUT_LABEL.config(fg='red')
-        OUTPUT_TEXT.set(f"Invalid public key format.")
+        OUTPUT_TEXT.set(f"{err_message}")
 
 def decrypt_wrapper():
     """Wraps the encrypted text and private key to send to the decryption function in RSA logic.
@@ -85,18 +77,18 @@ def decrypt_wrapper():
         decrypted_message = decrypt_message(encrypted_int, private_key)
         OUTPUT_TEXT.set(decrypted_message)
 
-    except ValueError as value_error:
+    except ValueError:
         OUTPUT_LABEL.config(fg='red')
-        OUTPUT_TEXT.set(f"Invalid private key or ciphertext format."
-                        f"Please ensure proper format.")
+        text = "Invalid private key or ciphertext format.Please ensure proper format."
+        OUTPUT_TEXT.set(text)
 
 def generate_and_show_keys():
-    """Calls the key generation functions of the RSA logic and returns the keys."""
+    """Calls the key generation functions of the RSA logic and shows the keys in the GUI."""
     OUTPUT_LABEL.config(fg='black')
     bits = int(KEY_BITS.get("1.0","end-1c"))
     if bits % 2 != 0:
         OUTPUT_LABEL.config(fg='red')
-        OUTPUT_TEXT.set(f"Key size should be a power of 2.")
+        OUTPUT_TEXT.set("Key size should be a power of 2.")
         return
     ROOT.public_key, ROOT.private_key = generate_keys(bits)
     messagebox.showinfo("Warning!", "Please do not share your private key!")
@@ -111,7 +103,8 @@ def generate_and_show_keys():
 ROOT = tk.Tk()
 ROOT.title("Save my secret!!")
 
-OUTPUT_TEXT = tk.StringVar(ROOT, "Your text to be encrypted must have a smaller size (in bits) than the key size.")
+TIP_TEXT ="Tip: Your text to be encrypted must have a smaller size (in bits) than the key size."
+OUTPUT_TEXT = tk.StringVar(ROOT, TIP_TEXT)
 OUTPUT_LABEL = tk.Label(ROOT, textvariable=OUTPUT_TEXT)
 
 # Create widgets
@@ -120,9 +113,6 @@ ENTRY_ENCRYPT = tk.Text(ROOT, width=60, height=7)
 
 PUBLIC_KEY = tk.Label(ROOT, text="Enter public key:")
 ENTRY_PUB_KEY = tk.Text(ROOT, width=60, height=7)
-
-# Button for encryption, sending text to encrypt and public key
-ENCRYPT_BUTTON = tk.Button(ROOT, text="Encrypt", command=encrypt_wrapper)
 
 DECRYPT_TEXT = tk.Label(ROOT, text="Enter string to decrypt:")
 ENTRY_DECRYPT = tk.Text(ROOT, width=60, height=7)
@@ -135,6 +125,12 @@ ENTRY_PUB = tk.Text(ROOT, width=60, height=5)
 
 PRIV_KEY_LABEL = tk.Label(ROOT, text="Your Private key:")
 ENTRY_PRIV = tk.Text(ROOT, width=60, height=5)
+
+KEY_BITS = tk.Text(ROOT, width=6, height=1)
+KEY_BITS.insert('end', '1024') # default key size is 1024 bits
+
+# Buttons creation
+ENCRYPT_BUTTON = tk.Button(ROOT, text="Encrypt", command=encrypt_wrapper)
 
 DECRYPT_BUTTON = tk.Button(ROOT, text="Decrypt", command=decrypt_wrapper)
 
@@ -149,9 +145,6 @@ GENERATE_KEYS_BUTTON = tk.Button(ROOT,
                                  text="Generate Encryption Keys with size (in bits): ",
                                  command=generate_and_show_keys)
 
-KEY_BITS = tk.Text(ROOT, width=6, height=1)
-KEY_BITS.insert('end', '1024') # default key size is 1024 bits
-
 # Layout widgets
 ENCRYPT_TEXT.grid(row=0, column=0, padx=10, pady=10)
 ENTRY_ENCRYPT.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
@@ -161,24 +154,22 @@ DECRYPT_TEXT.grid(row=2, column=0, padx=10, pady=10)
 ENTRY_DECRYPT.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
 PRIV_KEY_TEXT.grid(row=3, column=0, padx=10, pady=10)
 ENTRY_PRIV_KEY.grid(row=3, column=1, padx=10, pady=10, sticky="nsew")
+KEY_BITS.grid(row=4, column=1, padx=(350, 10), pady=10, sticky='w')
 
 ENCRYPT_BUTTON.grid(row=0, column=2, padx=10, pady=10)
 DECRYPT_BUTTON.grid(row=2, column=2, padx=10, pady=10)
 GENERATE_KEYS_BUTTON.grid(row=4, column=1, padx=(10, 0), pady=10, sticky='w')
-KEY_BITS.grid(row=4, column=1, padx=(350, 10), pady=10, sticky='w')
-
+COPY_PRIV_KEY_BUTTON.grid(row=7, column=2, padx=10, pady=10)
+COPY_PUB_KEY_BUTTON.grid(row=6, column=2, padx=10, pady=10)
 
 PUB_KEY_LABEL.grid(row=6, column=0, padx=10, pady=10)
 ENTRY_PUB.grid(row=6, column=1, padx=10, pady=10,sticky="nsew")
-COPY_PUB_KEY_BUTTON.grid(row=6, column=2, padx=10, pady=10)
 PRIV_KEY_LABEL.grid(row=7, column=0, padx=10, pady=10)
 ENTRY_PRIV.grid(row=7, column=1, padx=10, pady=10,sticky="nsew")
-COPY_PRIV_KEY_BUTTON.grid(row=7, column=2, padx=10, pady=10)
 
 OUTPUT_LABEL.grid(row=5, column=0, columnspan=3, padx=10, pady=10)
 
 # Make the application full-screen
-
 screen_width = ROOT.winfo_screenwidth()
 screen_height = ROOT.winfo_screenheight()
 ROOT.geometry(f'{screen_width}x{screen_height}+0+0')
