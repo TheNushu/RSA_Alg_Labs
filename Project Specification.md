@@ -2,13 +2,12 @@ Week 1
 * study program: Bachelor of Science
 * langugage of the project: Python
 		* langugages for which I could peer review projects: Python, Lua and possibly C++
-* Algorithms: 
+* Algorithms and data structures: 
 	* key generation
-	* prime number generation (Miller-Rabin test)
+	* prime number generation (Miller-Rabin test) using secure random number generation (with random.SystemRandom() )
+	* 
 	* modular exponentiation
-	* encryption/decryption algorithms
-	* signing
-	* verification of signature
+	* encryption/decryption algorithm
 * "What problem are you solving":
 	* securing plain text into encrypted text (that can be decrypted with private key usage)
 * Inputs:

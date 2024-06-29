@@ -27,7 +27,11 @@ from tkinter import messagebox
 from rsa_functionality import generate_keys, encrypt_message, decrypt_message
 
 def copy_to_clipboard(text):
-    """Copies a key (public or private) to user clipboard for easier save and use."""
+    """Copies a key (public or private) to user clipboard for easier save and use.
+
+    Args:
+        text (str): The text to be copied to the clipboard.
+    """
     ROOT.clipboard_clear()
     ROOT.clipboard_append(text)
     ROOT.update()
@@ -37,7 +41,14 @@ def copy_to_clipboard(text):
 
 def encrypt_wrapper():
     """Wraps the text and public key to send to the encryption function in RSA logic.
-    Retrieves the result that is the encrypted text and copies it to clipboard."""
+
+    Retrieves the result that is the encrypted text and copies it to clipboard.
+    
+    Raises:
+        TypeError: If the message or public key inputs are not of the expected types.
+        ValueError: If the message is empty or consists only of whitespace,
+                    or if the message bit length is greater than or equal to the modulus bit length.
+    """
     OUTPUT_LABEL.config(fg='black')
     input_text = ENTRY_ENCRYPT.get("1.0","end-1c")
 
@@ -61,8 +72,17 @@ def encrypt_wrapper():
         OUTPUT_TEXT.set(f"{err_message}")
 
 def decrypt_wrapper():
-    """Wraps the encrypted text and private key to send to the decryption function in RSA logic.
-    Retrieves the result that is the decrypted text."""
+    """
+    Wraps the encrypted text and private key to decrypt using RSA logic.
+
+    Retrieves the decrypted plaintext message.
+
+    Raises:
+        TypeError: If the ciphertext or private key inputs are not of the expected types.
+        ValueError: If the ciphertext is empty or consists only of whitespace,
+                    or if the decrypted message bit length is
+                    greater than or equal to the modulus bit length.
+    """
 
     OUTPUT_LABEL.config(fg='black')
     encrypted_text = ENTRY_DECRYPT.get("1.0","end-1c")
@@ -83,7 +103,16 @@ def decrypt_wrapper():
         OUTPUT_TEXT.set(text)
 
 def generate_and_show_keys():
-    """Calls the key generation functions of the RSA logic and shows the keys in the GUI."""
+    """
+    Calls the key generation functions of the RSA logic and displays the generated keys in the GUI.
+
+    Retrieves the generated RSA keys and updates the respective entry fields in the GUI.
+
+    Raises:
+        TypeError: If the input for the key size is not an integer.
+        ValueError: If the key size is less than 8 or not a power of 2.
+    """
+
     OUTPUT_LABEL.config(fg='black')
     bits = int(KEY_BITS.get("1.0","end-1c"))
     if bits % 2 != 0:

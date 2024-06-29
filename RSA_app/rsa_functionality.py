@@ -32,7 +32,16 @@ FIRST_PRIMES_LIST = [
 ]
 
 def generate_n_bit_random(bit_length):
-    """Generate a random number with a specified bit length."""
+    """Generate a random number with a specified bit length.
+
+    Args:
+        bit_length (int): bit size of random number
+
+    Returns:
+        int: number with bit_length size in bits
+    Raises:
+        ValueError: If bit size less than 8 or of a different type than int
+    """
     if isinstance(bit_length, int) is not True:
         raise ValueError("Bit size must be an integer.")
 
@@ -44,7 +53,14 @@ def generate_n_bit_random(bit_length):
     return system_random.randint(2**(bit_length-1) + 1, 2**bit_length - 1)
 
 def gen_prime_candidate(bit_length):
-    """Generate a prime candidate not divisible by first primes."""
+    """Generate a prime candidate not divisible by first primes.
+
+    Args:
+        bit_length (int): bit size of prime candidate
+
+    Returns:
+        int: random number that is not divisble by the first arbitrary primes
+    """
 
     while True:
         prime_candidate = generate_n_bit_random(bit_length)
@@ -55,7 +71,14 @@ def gen_prime_candidate(bit_length):
             return prime_candidate
 
 def is_miller_rabin_passed(candidate_prime):
-    """Perform the Miller-Rabin primality test on a candidate prime number."""
+    """Perform the Miller-Rabin primality test on a candidate prime number.
+    
+    Args:
+        candidate_prime (int): number to be tested with miller rabin test
+    
+    Returns:
+        bool: True if passed as prime, False otherwise
+    """
     # note, the check if it is a small prime number
     # is done in gen_prime_candidate()
     if isinstance(candidate_prime, int) is not True:
@@ -73,8 +96,15 @@ def is_miller_rabin_passed(candidate_prime):
 
     def is_composite(test_base):
         """
-    	Determine if a number is composite (not prime)
+    	Determine if candidate_prime (int) is composite/not prime
         using the Miller-Rabin primality test conditions.
+
+        Args:
+            test_base (int): base used by miller rabin test in
+                             modular exponentiation (line 110)
+
+        Returns:
+            bool: True if prime_candidate is likely prime, False otherwise
     	"""
         if pow(test_base, remaining, candidate_prime) == 1:
             return False
@@ -91,14 +121,34 @@ def is_miller_rabin_passed(candidate_prime):
     return True
 
 def generate_prime(bits):
-    """Generate a prime number with a given number of bits."""
+    """Generate a prime number with a given number of bits.
+
+    Args:
+        bits (int): bit size of prime number to be generated
+
+    Returns:
+        int: a prime number with specified bit size
+    """
     while True:
         prime_candidate = gen_prime_candidate(bits)
         if is_miller_rabin_passed(prime_candidate):
             return prime_candidate
 
 def generate_keys(bits):
-    """Generate a pair of RSA keys."""
+    """Generate a pair of RSA keys.
+
+    Args:
+        bits (int): bit sizes of keys
+
+    Returns:
+        tuple: A tuple containing the RSA keys:
+            - (public_exponent, modulus_n): Public key components.
+            - (private_exponent, modulus_n): Private key components.
+
+    Raises:
+        TypeError: If `bits` is not an integer.
+        ValueError: If `bits` is less than 8.
+    """
     public_exponent = 65537  # Common choice for public exponent
     if isinstance(bits, int) is not True:
         raise TypeError("Bit size must be an integer.")
@@ -124,7 +174,23 @@ def generate_keys(bits):
     return (public_exponent, modulus_n), (private_exponent, modulus_n)
 
 def encrypt_message(message, public_key):
-    """Encrypt a message using the public key."""
+    """
+    Encrypts a message using the RSA public key.
+
+    Args:
+        message (str): The message to be encrypted.
+        public_key (tuple): A tuple containing the RSA public key components (e, n):
+                            - e (int): Public exponent.
+                            - n (int): Modulus.
+
+    Returns:
+        int: The encrypted ciphertext.
+
+    Raises:
+        TypeError: If `message` is not a string or if `public_key` is not a tuple of two integers.
+        ValueError: If `message` is empty or consists only of whitespace,
+                    or if the message bit length is greater than or equal to the modulus bit length.
+    """
 
     if len(message) <= 0 or str.isspace(message):
         raise TypeError("Message must be non-empty.")
@@ -153,7 +219,25 @@ def encrypt_message(message, public_key):
     return ciphertext
 
 def decrypt_message(ciphertext, private_key):
-    """Decrypt a message using the private key."""
+    """
+    Decrypt a ciphertext using the RSA private key.
+
+    Args:
+        ciphertext (int): The encrypted ciphertext to be decrypted.
+        private_key (tuple): A tuple containing the RSA private key components (d, n):
+                            - d (int): Private exponent.
+                            - n (int): Modulus.
+
+    Returns:
+        str: The decrypted message.
+
+    Raises:
+        TypeError: If `ciphertext` is not an integer or if `private_key`
+                   is not a tuple of two integers.
+        ValueError: If `ciphertext` is empty or consists only of whitespace,
+                    or if the decrypted message bit length is
+                    greater than or equal to the modulus bit length.
+    """
 
     string_cipher = str(ciphertext)
 
