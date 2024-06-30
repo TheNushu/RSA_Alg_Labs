@@ -43,7 +43,7 @@ def generate_n_bit_random(bit_length):
         ValueError: If bit size less than 8 or of a different type than int
     """
     if isinstance(bit_length, int) is not True:
-        raise ValueError("Bit size must be an integer.")
+        raise TypeError("Bit size must be an integer.")
 
     if bit_length < 8:
         raise ValueError(f"Bit size must be at least 8 to form "
@@ -82,7 +82,10 @@ def is_miller_rabin_passed(candidate_prime):
     # note, the check if it is a small prime number
     # is done in gen_prime_candidate()
     if isinstance(candidate_prime, int) is not True:
-        raise ValueError("Candidate prime must be an integer.")
+        raise TypeError("Candidate prime must be an integer.")
+    
+    if candidate_prime < 0:
+        raise ValueError("Candidate prime must be positive")
 
     if candidate_prime % 2 == 0:
         return False
