@@ -153,6 +153,7 @@ class TestRSAGeneration(unittest.TestCase):
                 "Decrypted message does not match the original"
             )
 
+        #test edge case of 16 bit key
         public_key, private_key = generate_keys(16)
         with self.assertRaises(ValueError, msg=f"Message of {message_bit_length} bits "
                                                 f"is too big for 16 bits key to encrypt"):
@@ -204,10 +205,10 @@ class TestRSAGeneration(unittest.TestCase):
         This test checks that:
         - Functions raise appropriate exceptions for invalid inputs such
         as incorrect data types and values,
-        ensuring the RSA module handles errors gracefully and securely.
-        - Encryption and decryption functions specifically check
-        for and handle invalid message formats,
-        key formats, and empty inputs, preventing misuse and potential security flaws.
+        ensuring the RSA module handles errors correctly.
+        - Encryption and decryption functions specifically check for and
+        handle invalid message formats, key formats, and empty inputs,
+        preventing misuse and potential security flaws.
         """
 
         with self.assertRaises(ValueError):
