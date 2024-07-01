@@ -105,7 +105,7 @@ Improvements to the user interface to be easier to use would be desired, but the
 
 ## Use of Language Models
 
-I have used the help of chat gpt 4 throughout the project. Most details are in the beginning of each weekly report, but I have used it in the beginning as a code reviewer and with help in debugging. By the end of the course, through feedback from labtool I stopped using it for logic/reasoning questions. This proved to slow me down, but I can already see that it makes me improve faster as a programmer.
+I have used the help of chat gpt 4 throughout the project. Most details are in the beginning of each weekly report, but I have used it in the beginning as a code reviewer and with help in debugging. By the end of the course, through feedback from labtool I stopped using it for logic/reasoning questions. This proved to slow me down, but I can already see that it made me improve as a programmer.
 
 I have also used chat gpt 4 to write boiler plate code, and some prompts of the form "please rewrite this function to include `some format instruction`".
 
