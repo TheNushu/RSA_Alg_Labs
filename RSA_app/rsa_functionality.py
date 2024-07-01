@@ -214,8 +214,8 @@ def encrypt_message(message, public_key):
 
     # Check if the message bit length is less than the modulus bit length
     if message_bit_length >= modulus_bit_length:
-        raise ValueError(f"The message is too long ({message_bit_length} bits) to be encrypted"
-                         f"with the given key ({modulus_bit_length}) bits."
+        raise ValueError(f"The message is too long ({message_bit_length} bits) to be encrypted "
+                         f"with the given key ({modulus_bit_length}) bits. "
                          f"Please either reduce the message size or use a bigger key.")
 
     ciphertext = pow(message_int, public_exponent, modulus_n)
@@ -255,14 +255,18 @@ def decrypt_message(ciphertext, private_key):
         raise TypeError("Both public exponent and modulus must be integers")
 
     modulus_bit_length = modulus_n.bit_length()
-    message_int = pow(ciphertext, private_exponent, modulus_n)
-    message_bit_length = message_int.bit_length()
+    message_bit_length = int(ciphertext).bit_length()
 
-    # Check if the message bit length is less than the modulus bit length
-    if message_bit_length >= modulus_bit_length:
-        raise ValueError(f"The message is too long ({message_bit_length} bits) to be encrypted"
-                         f"with the given key ({modulus_bit_length}) bits."
+    # This check is for when we try to decrypt an already encrypted test before the session
+    # We check if the size of the private key matches the size of the encrypted text
+    # When text becomes encrypted, it receives the size of the public key
+    # Public and private key moduluses are the same/have the same size
+
+    if message_bit_length > modulus_bit_length:
+        raise ValueError(f"The message is too long ({message_bit_length} bits) to be decrypted "
+                         f"with the given key ({modulus_bit_length}) bits. "
                          f"Please either reduce the message size or use a bigger key.")
 
+    message_int = pow(ciphertext, private_exponent, modulus_n)
     message = message_int.to_bytes((message_int.bit_length() + 7) // 8, 'big').decode('utf-8')
     return message

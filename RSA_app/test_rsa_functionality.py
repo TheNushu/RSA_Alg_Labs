@@ -139,6 +139,7 @@ class TestRSAGeneration(unittest.TestCase):
         as expected across different key sizes.
         """
         message = "Test message 12!.'s@[]"
+        pseudo_encrytpted_message = "61897001964269" # 46 bits
         message_int = int.from_bytes(message.encode('utf-8'), 'big')
         message_bit_length = message_int.bit_length()
 
@@ -153,9 +154,12 @@ class TestRSAGeneration(unittest.TestCase):
             )
 
         public_key, private_key = generate_keys(16)
-        with self.assertRaises(ValueError, msg=f"Message of {message_bit_length} bits"
+        with self.assertRaises(ValueError, msg=f"Message of {message_bit_length} bits "
                                                 f"is too big for 16 bits key to encrypt"):
             encrypt_message(message, public_key)
+        with self.assertRaises(ValueError, msg=f"Message of {int(message_bit_length).bit_length()} bits"
+                                                f" is too big for 16 bits key to decrypt"):
+            decrypt_message(pseudo_encrytpted_message, private_key)
 
     def test_generate_keys(self):
         """
@@ -243,7 +247,7 @@ class TestRSAGeneration(unittest.TestCase):
         with self.assertRaises(TypeError, msg="Encrypt and decrypt should fail on inproper input"):
             decrypt_message("", (65537, 99991)) # Empty string
 
-#23.06.24 05:52 am: coverage report 89%
+#30.06.24: coverage report 95%
 
 if __name__ == '__main__':
     unittest.main()
