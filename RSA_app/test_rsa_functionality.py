@@ -153,7 +153,18 @@ class TestRSAGeneration(unittest.TestCase):
                 "Decrypted message does not match the original"
             )
 
-        #test edge case of 16 bit key
+        public_key, private_key = generate_keys(1024)
+        #1024 bit string
+        message = "loremipsumloremipsumloremipsumloremipsumloremipsumloremipsumloremipsumloremipsumloremipsumloremipsumloremipsumloremipsumloremips"
+        
+        encrypted = encrypt_message(message, public_key)
+        decrypted = decrypt_message(encrypted, private_key)
+        self.assertEqual(
+            decrypted, message,
+            "Decrypted 1024 message does not match the original"
+        )
+
+        #test edge case of 16 bit key       
         public_key, private_key = generate_keys(16)
         with self.assertRaises(ValueError, msg=f"Message of {message_bit_length} bits "
                                                 f"is too big for 16 bits key to encrypt"):
