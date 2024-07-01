@@ -32,7 +32,7 @@ After you generate the keys, you'll see the following warning:\
 ![image](https://github.com/TheNushu/RSA_Alg_Labs/assets/131345754/e0ac437d-c599-4185-a1be-145c7d0f8de2) 
 Take into account that once your private key is known by a different party, they can decrypt every single thing encrypted with the public key pair if they know the public key. But even if they do not, it is easier to crack a public key once you know the private one.
 
-After you press ok, the bottom 2 text areas will fill with the generated keys. Note: if you have chosen large keys, this might take a little more time. See the performance area in the test file to have an idea *INSERT LINK TO TEST DOCUMENT HERE*. The generation also depends on your computing power.\
+After you press ok, the bottom 2 text areas will fill with the generated keys. Note: if you have chosen large keys, this might take a little more time. See the performance area in the [test file](https://github.com/TheNushu/RSA_Alg_Labs/blob/main/Documentation/Testing.md) to have an idea. The generation also depends on your computing power.\
 ![image](https://github.com/TheNushu/RSA_Alg_Labs/assets/131345754/5aeb1678-0a70-4de9-812a-d4596d2f9887)
 
 ![image](https://github.com/TheNushu/RSA_Alg_Labs/assets/131345754/cc11eec9-24f4-4428-b86c-d7fcaf31ec12) 
