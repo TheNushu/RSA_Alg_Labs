@@ -109,7 +109,15 @@ I have used the help of chat gpt 4 throughout the project. Most details are in t
 
 I have also used chat gpt 4 to write boiler plate code, and some prompts of the form "please rewrite this function to include `some format instruction`".
 
+It would be a useful feature to have file writing and reading. Like this, multiple key pairs can be stored and multiple encrypted messages.
+
 It proved to be a very useful tool throughout the course.
+
+## Pylint results
+
+![image](https://github.com/TheNushu/RSA_Alg_Labs/assets/131345754/98bbec9f-8c07-471f-a433-b88687ebb270)
+
+The code respects the standard python coding practices with grades 10 for the files `rsa_functionality.py` and `app.py`. `test_rsa_functionality.py` doesn't have max scores because of the lines that are too long. Those respective lines consist of the large primes saved for testing purposes. (except line 195)
 
 ## Sources
 
