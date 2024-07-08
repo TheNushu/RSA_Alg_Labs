@@ -126,7 +126,7 @@ The code respects the standard python coding practices with grades 10 for the fi
 3. [RSA-768, Wikipedia, March 2024](https://en.wikipedia.org/wiki/RSA_numbers#RSA-768)
 4. [Modular Exponentiation, Wikipedia, March 2024](https://en.wikipedia.org/wiki/Modular_exponentiation)
 5. [Miller-Rabin Test, Strong Probable Primes, Wikipedia, May 2024](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test#Strong_probable_primes)
-6. [Interactive Chaos, 2021](https://interactivechaos.com/en/python/function/randomsystemrandom)
+6. [random.SystemRandom, Interactive Chaos, 2021](https://interactivechaos.com/en/python/function/randomsystemrandom)
 7. [SquareRootOfTwentyThree, Nov 2014](https://stackoverflow.com/a/21450484/20081651)
 8. [Damgard-Landrock-Pomerance, Average case error estimates for the strong probable prime test, July 1993](https://math.dartmouth.edu/~carlp/PDF/paper88.pdf)
 9. [Prime glossary, "prime number theorem"](https://t5k.org/glossary/page.php?sort=PrimeNumberThm#:~:text=The%20prime%20number%20theorem%20implies,to%201%2Flog%20n).
